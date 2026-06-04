@@ -1,0 +1,4 @@
+# 忽略前端构建产物（会被 Maven 重新生成）
+dist/
+node_modules/
+.cache/
