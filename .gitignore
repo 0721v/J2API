@@ -1,0 +1,9 @@
+/frontend/node
+/frontend/node_modules
+/backend/.vscode/
+/backend/logs/
+/backend/target
+/backend/startup.log
+/backend/startup_new.log
+.gitignore
+*.log
