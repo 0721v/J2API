@@ -78,7 +78,7 @@ public class ApiKeyUtil {
      * 生成UUID
      */
     public String generateUUID() {
-        return IdUtil.fastUUID().toString(true);
+        return IdUtil.fastUUID();
     }
 
     /**

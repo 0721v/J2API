@@ -145,7 +145,7 @@ public class CreemPaymentService implements PaymentService {
             String url = endpoint + "/v1/orders?metadata[orderNo]=" + orderNo;
 
             HttpHeaders headers = new HttpHeaders();
-            headers.setAuthorization("Bearer " + apiKey);
+            headers.set("Authorization", "Bearer " + apiKey);
 
             HttpEntity<Void> entity = new HttpEntity<>(headers);
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
@@ -175,7 +175,7 @@ public class CreemPaymentService implements PaymentService {
             String url = endpoint + "/v1/checkouts/" + checkoutId;
 
             HttpHeaders headers = new HttpHeaders();
-            headers.setAuthorization("Bearer " + apiKey);
+            headers.set("Authorization", "Bearer " + apiKey);
 
             HttpEntity<Void> entity = new HttpEntity<>(headers);
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
@@ -342,7 +342,7 @@ public class CreemPaymentService implements PaymentService {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setAuthorization("Bearer " + apiKey);
+            headers.set("Authorization", "Bearer " + apiKey);
 
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("reason", reason != null ? reason : "User requested refund");
@@ -380,7 +380,7 @@ public class CreemPaymentService implements PaymentService {
             String url = endpoint + "/v1/orders?metadata[orderNo]=" + orderNo;
 
             HttpHeaders headers = new HttpHeaders();
-            headers.setAuthorization("Bearer " + apiKey);
+            headers.set("Authorization", "Bearer " + apiKey);
 
             HttpEntity<Void> entity = new HttpEntity<>(headers);
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);

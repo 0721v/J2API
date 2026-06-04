@@ -110,6 +110,18 @@ public class Result<T> implements Serializable {
     }
 
     /**
+     * 业务异常（简化）
+     */
+    public static <T> Result<T> fail(String message) {
+        return Result.<T>builder()
+                .code(400)
+                .message(message)
+                .timestamp(System.currentTimeMillis())
+                .success(false)
+                .build();
+    }
+
+    /**
      * 验证失败
      */
     public static <T> Result<T> validateFailed(String message) {

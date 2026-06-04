@@ -3,6 +3,7 @@ package com.apiplatform.controller;
 import com.apiplatform.common.PageResult;
 import com.apiplatform.common.Result;
 import com.apiplatform.entity.*;
+import com.apiplatform.mapper.AgentWithdrawalMapper;
 import com.apiplatform.service.*;
 import com.apiplatform.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +28,7 @@ public class AgentController {
     private final CommissionSettlementService commissionSettlementService;
     private final AgentNotificationService notificationService;
     private final JwtUtil jwtUtil;
+    private final AgentWithdrawalMapper agentWithdrawalMapper;
 
     @Value("${system.base-url:http://localhost:3000}")
     private String baseUrl;
@@ -152,7 +154,7 @@ public class AgentController {
      * 根据邀请码查询代理商（公开接口）
      */
     @GetMapping("/by-code/{code}")
-    public Result<Agent> getAgentByCode(@PathVariable String code) {
+    public Result<Map<String, Object>> getAgentByCode(@PathVariable String code) {
         Agent agent = agentService.getAgentByCode(code);
         if (agent != null) {
             return Result.success(Map.of(
@@ -232,8 +234,9 @@ public class AgentController {
             return Result.fail("您还不是代理商");
         }
         
+        long total = commissionSettlementService.countReferralUsers(agent.getId());
         List<Map<String, Object>> users = commissionSettlementService.getReferralUsers(agent.getId(), page, pageSize);
-        return Result.success(new PageResult<>(users, users.size()));
+        return Result.success(PageResult.of(users, total, (long) page, (long) pageSize));
     }
 
     /**
@@ -421,7 +424,7 @@ public class AgentController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Long agentId) {
         // TODO: 实现管理员查询所有提现记录
-        return Result.success(new PageResult<>(List.of(), 0));
+        return Result.success(PageResult.of(List.of(), 0L));
     }
 
     /**
@@ -438,7 +441,7 @@ public class AgentController {
         agentService.processWithdrawal(withdrawalId, status, rejectReason, processorId);
         
         // 发送通知
-        AgentWithdrawal withdrawal = agentService.getById(withdrawalId);
+        AgentWithdrawal withdrawal = agentWithdrawalMapper.selectById(withdrawalId);
         if (withdrawal != null) {
             if ("completed".equals(status)) {
                 notificationService.notifyWithdrawalCompleted(
@@ -495,6 +498,6 @@ public class AgentController {
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
         }
-        return jwtUtil.getUserIdFromToken(token);
+        return jwtUtil.getUserId(token);
     }
 }

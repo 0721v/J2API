@@ -32,7 +32,7 @@ import java.util.*;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class OAuthServiceImpl extends ServiceImpl implements OAuthService {
+public class OAuthServiceImpl extends ServiceImpl<OAuthBindingMapper, OAuthBinding> implements OAuthService {
 
     private final OAuthProviderMapper providerMapper;
     private final OAuthBindingMapper bindingMapper;
@@ -64,8 +64,8 @@ public class OAuthServiceImpl extends ServiceImpl implements OAuthService {
             throw new BizException("不支持的OAuth提供商: " + providerType);
         }
 
-        Map<String, String> config = parseConfig(provider.getConfig());
-        String authUrl = provider.getAuthUrl();
+        Map<String, String> config = parseConfig(provider.getExtraParams());
+        String authUrl = provider.getAuthorizationUri();
         String clientId = provider.getClientId();
         String redirectUri = callbackUrl + "/" + providerType;
 
@@ -105,7 +105,7 @@ public class OAuthServiceImpl extends ServiceImpl implements OAuthService {
         if (binding != null) {
             // 已绑定账户，登录
             User user = userService.getById(binding.getUserId());
-            if (user == null || user.getDisabled()) {
+            if (user == null || "disabled".equals(user.getStatus())) {
                 throw new BizException("账户已被禁用");
             }
             return generateLoginResult(user);
@@ -218,8 +218,8 @@ public class OAuthServiceImpl extends ServiceImpl implements OAuthService {
         }
 
         try {
-            Map<String, String> config = parseConfig(provider.getConfig());
-            String tokenUrl = provider.getTokenUrl();
+            Map<String, String> config = parseConfig(provider.getExtraParams());
+            String tokenUrl = provider.getTokenUri();
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -269,7 +269,7 @@ public class OAuthServiceImpl extends ServiceImpl implements OAuthService {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             ResponseEntity<String> response = restTemplate.exchange(
-                    provider.getUserInfoUrl(),
+                    provider.getUserInfoUri(),
                     HttpMethod.GET,
                     entity,
                     String.class
@@ -311,9 +311,9 @@ public class OAuthServiceImpl extends ServiceImpl implements OAuthService {
     }
 
     private Map<String, Object> handleLinuxDoCallback(String code, OAuthProvider provider) {
-        Map<String, String> config = parseConfig(provider.getConfig());
-        String tokenUrl = provider.getTokenUrl();
-        String userInfoUrl = provider.getUserInfoUrl();
+        Map<String, String> config = parseConfig(provider.getExtraParams());
+        String tokenUrl = provider.getTokenUri();
+        String userInfoUrl = provider.getUserInfoUri();
 
         try {
             // 获取Access Token
@@ -411,9 +411,9 @@ public class OAuthServiceImpl extends ServiceImpl implements OAuthService {
     }
 
     private Map<String, Object> handleOidcCallback(String code, OAuthProvider provider) {
-        Map<String, String> config = parseConfig(provider.getConfig());
-        String tokenUrl = provider.getTokenUrl();
-        String userInfoUrl = provider.getUserInfoUrl();
+        Map<String, String> config = parseConfig(provider.getExtraParams());
+        String tokenUrl = provider.getTokenUri();
+        String userInfoUrl = provider.getUserInfoUri();
 
         try {
             // 获取Access Token

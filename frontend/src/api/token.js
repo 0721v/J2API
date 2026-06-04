@@ -1,4 +1,4 @@
-import request from './request'
+﻿import request from '../utils/request'
 
 export function getTokens(params) {
   return request.get('/tokens', { params })
@@ -35,3 +35,4 @@ export function renewToken(id) {
 export function getTokenUsage(id) {
   return request.get(`/tokens/${id}/usage`)
 }
+

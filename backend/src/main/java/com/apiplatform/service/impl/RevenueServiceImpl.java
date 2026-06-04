@@ -34,8 +34,8 @@ public class RevenueServiceImpl implements RevenueService {
         Long payingUsers = revenueMapper.getPayingUserCount();
 
         // API消费
-        LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
-        LocalDateTime endOfToday = LocalDate.now().atTime(LocalTime.MAX);
+        LocalDate startOfMonth = LocalDate.now().withDayOfMonth(1);
+        LocalDate endOfToday = LocalDate.now();
         Map<String, Object> apiConsumption = revenueMapper.getApiConsumption(startOfMonth, endOfToday);
 
         // 代理分成
@@ -61,8 +61,8 @@ public class RevenueServiceImpl implements RevenueService {
         Long todayOrders = revenueMapper.getTodayOrderCount();
         Long todayNewUsers = revenueMapper.getTodayNewPayingUsers();
 
-        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-        LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+        LocalDate startOfDay = LocalDate.now();
+        LocalDate endOfDay = LocalDate.now();
         Map<String, Object> apiConsumption = revenueMapper.getApiConsumption(startOfDay, endOfDay);
 
         revenue.put("revenue", todayRevenue != null ? todayRevenue : BigDecimal.ZERO);
@@ -82,8 +82,8 @@ public class RevenueServiceImpl implements RevenueService {
         Long monthOrders = revenueMapper.getTotalOrderCount(); // 简化计算
         Long payingUsers = revenueMapper.getPayingUserCount();
 
-        LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
-        LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+        LocalDate startOfMonth = LocalDate.now().withDayOfMonth(1);
+        LocalDate endOfDay = LocalDate.now();
         Map<String, Object> apiConsumption = revenueMapper.getApiConsumption(startOfMonth, endOfDay);
 
         revenue.put("revenue", monthRevenue != null ? monthRevenue : BigDecimal.ZERO);
@@ -103,9 +103,7 @@ public class RevenueServiceImpl implements RevenueService {
 
     @Override
     public List<Map<String, Object>> getDailyTrend(LocalDate startDate, LocalDate endDate) {
-        LocalDateTime start = startDate.atStartOfDay();
-        LocalDateTime end = endDate.atTime(LocalTime.MAX);
-        return revenueMapper.getDailyRevenueTrend(start, end);
+        return revenueMapper.getDailyRevenueTrend(startDate, endDate);
     }
 
     @Override
@@ -115,24 +113,17 @@ public class RevenueServiceImpl implements RevenueService {
 
     @Override
     public List<Map<String, Object>> getRevenueByPaymentChannel(LocalDate startDate, LocalDate endDate) {
-        LocalDateTime start = startDate.atStartOfDay();
-        LocalDateTime end = endDate.atTime(LocalTime.MAX);
-        return revenueMapper.getRevenueByChannel(start, end);
+        return revenueMapper.getRevenueByChannel(startDate, endDate);
     }
 
     @Override
     public List<Map<String, Object>> getRevenueByBusinessType(LocalDate startDate, LocalDate endDate) {
-        LocalDateTime start = startDate.atStartOfDay();
-        LocalDateTime end = endDate.atTime(LocalTime.MAX);
-        return revenueMapper.getRevenueByBusinessType(start, end);
+        return revenueMapper.getRevenueByBusinessType(startDate, endDate);
     }
 
     @Override
     public Map<String, Object> getOrderStats(LocalDate startDate, LocalDate endDate) {
-        LocalDateTime start = startDate.atStartOfDay();
-        LocalDateTime end = endDate.atTime(LocalTime.MAX);
-
-        List<Map<String, Object>> dailyStats = revenueMapper.getDailyRevenueTrend(start, end);
+        List<Map<String, Object>> dailyStats = revenueMapper.getDailyRevenueTrend(startDate, endDate);
 
         long totalOrders = 0;
         BigDecimal totalRevenue = BigDecimal.ZERO;

@@ -1,4 +1,4 @@
-import request from './request'
+﻿import request from '../utils/request'
 
 export function getUsageStats(params) {
   return request.get('/user/stats', { params })
@@ -19,3 +19,4 @@ export function getDailyTrend(params) {
 export function getUsageLogs(params) {
   return request.get('/user/usage-logs', { params })
 }
+

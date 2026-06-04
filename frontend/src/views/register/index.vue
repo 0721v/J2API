@@ -73,7 +73,7 @@
         <!-- 邀请奖励预览 -->
         <div v-if="inviteRewards.length > 0" class="invite-reward-preview">
           <div class="reward-title">
-            <el-icon><Gift /></el-icon>
+            <el-icon><Star /></el-icon>
             <span>使用邀请码可获得以下奖励</span>
           </div>
           <div class="reward-list">
@@ -120,7 +120,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { validateInviteCode, getInviteRewards } from '@/api/user'
 import { ElMessage } from 'element-plus'
-import { Gift, CircleCheck, Loading } from '@element-plus/icons-vue'
+import { Star, CircleCheck, Loading } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()

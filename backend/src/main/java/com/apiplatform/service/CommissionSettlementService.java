@@ -75,6 +75,11 @@ public interface CommissionSettlementService extends IService<AgentCommission> {
     List<Map<String, Object>> getReferralUsers(Long agentId, int page, int pageSize);
 
     /**
+     * 统计推荐用户数量
+     */
+    long countReferralUsers(Long agentId);
+
+    /**
      * 获取下级代理商列表
      */
     List<Agent> getSubAgents(Long agentId);

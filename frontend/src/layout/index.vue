@@ -4,7 +4,6 @@
       <!-- 侧边栏 -->
       <el-aside :width="isCollapse ? '64px' : '220px'" class="aside">
         <div class="logo">
-          <img src="@/assets/logo.png" alt="Logo" v-if="!isCollapse">
           <span v-if="!isCollapse">API Platform</span>
           <el-icon v-else><Monitor /></el-icon>
         </div>

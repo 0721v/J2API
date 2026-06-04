@@ -2,8 +2,7 @@ package com.apiplatform.service.impl;
 
 import com.apiplatform.entity.Token;
 import com.apiplatform.service.RateLimitService;
-import com.apiplatform.service.TokenService;
-import com.apiplatform.util.RedisUtil;
+import com.apiplatform.util.CacheUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,8 +25,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class RateLimitServiceImpl implements RateLimitService {
 
-    private final RedisUtil redisUtil;
-    private final TokenService tokenService;
+    private final CacheUtil cacheUtil;
 
     @Value("${system.rate-limit.enabled:true}")
     private boolean rateLimitEnabled;
@@ -49,7 +47,7 @@ public class RateLimitServiceImpl implements RateLimitService {
         }
 
         String key = MINUTE_KEY_PREFIX + token.getId();
-        Long current = redisUtil.get(key);
+        Long current = cacheUtil.get(key);
         
         if (current == null) {
             return true;
@@ -65,7 +63,7 @@ public class RateLimitServiceImpl implements RateLimitService {
         }
 
         String key = DAY_KEY_PREFIX + token.getId();
-        Long current = redisUtil.get(key);
+        Long current = cacheUtil.get(key);
         
         if (current == null) {
             return true;
@@ -81,7 +79,7 @@ public class RateLimitServiceImpl implements RateLimitService {
         }
 
         String key = GLOBAL_KEY + ":minute";
-        Long current = redisUtil.get(key);
+        Long current = cacheUtil.get(key);
         
         // 全局限流默认10000次/分钟
         if (current == null) {
@@ -99,7 +97,7 @@ public class RateLimitServiceImpl implements RateLimitService {
 
         // 用户级别限流：默认1000次/分钟
         String key = "ratelimit:user:" + userId + ":minute";
-        Long current = redisUtil.get(key);
+        Long current = cacheUtil.get(key);
         
         if (current == null) {
             return true;
@@ -116,7 +114,7 @@ public class RateLimitServiceImpl implements RateLimitService {
 
         // IP级别限流：默认500次/分钟
         String key = "ratelimit:ip:" + ipAddress + ":minute";
-        Long current = redisUtil.get(key);
+        Long current = cacheUtil.get(key);
         
         if (current == null) {
             return true;
@@ -133,29 +131,29 @@ public class RateLimitServiceImpl implements RateLimitService {
 
         // 分钟计数
         String minuteKey = MINUTE_KEY_PREFIX + token.getId();
-        Long minuteCount = redisUtil.increment(minuteKey);
+        Long minuteCount = cacheUtil.increment(minuteKey);
         if (minuteCount != null && minuteCount == 1) {
-            redisUtil.expire(minuteKey, 60, TimeUnit.SECONDS);
+            cacheUtil.expire(minuteKey, 60, TimeUnit.SECONDS);
         }
 
         // 日计数
         String dayKey = DAY_KEY_PREFIX + token.getId();
-        Long dayCount = redisUtil.increment(dayKey);
+        Long dayCount = cacheUtil.increment(dayKey);
         if (dayCount != null && dayCount == 1) {
             // 设置过期时间为明天凌晨
             long secondsUntilMidnight = getSecondsUntilMidnight();
-            redisUtil.expire(dayKey, secondsUntilMidnight, TimeUnit.SECONDS);
+            cacheUtil.expire(dayKey, secondsUntilMidnight, TimeUnit.SECONDS);
         }
 
         // 全局限流计数
         String globalMinuteKey = GLOBAL_KEY + ":minute";
-        redisUtil.increment(globalMinuteKey);
-        redisUtil.expire(globalMinuteKey, 60, TimeUnit.SECONDS);
+        cacheUtil.increment(globalMinuteKey);
+        cacheUtil.expire(globalMinuteKey, 60, TimeUnit.SECONDS);
 
         // 用户计数
         String userMinuteKey = "ratelimit:user:" + token.getUserId() + ":minute";
-        redisUtil.increment(userMinuteKey);
-        redisUtil.expire(userMinuteKey, 60, TimeUnit.SECONDS);
+        cacheUtil.increment(userMinuteKey);
+        cacheUtil.expire(userMinuteKey, 60, TimeUnit.SECONDS);
 
         log.debug("增加请求计数: tokenId={}, minuteCount={}, dayCount={}", 
                 token.getId(), minuteCount, dayCount);
@@ -164,28 +162,28 @@ public class RateLimitServiceImpl implements RateLimitService {
     @Override
     public Long getMinuteRequestCount(Token token) {
         String key = MINUTE_KEY_PREFIX + token.getId();
-        Long count = redisUtil.get(key);
+        Long count = cacheUtil.get(key);
         return count != null ? count : 0L;
     }
 
     @Override
     public Long getDayRequestCount(Token token) {
         String key = DAY_KEY_PREFIX + token.getId();
-        Long count = redisUtil.get(key);
+        Long count = cacheUtil.get(key);
         return count != null ? count : 0L;
     }
 
     @Override
     public Long getUserMinuteRequestCount(Long userId) {
         String key = "ratelimit:user:" + userId + ":minute";
-        Long count = redisUtil.get(key);
+        Long count = cacheUtil.get(key);
         return count != null ? count : 0L;
     }
 
     @Override
     public Long getUserDayRequestCount(Long userId) {
         String key = "ratelimit:user:" + userId + ":day:" + LocalDate.now();
-        Long count = redisUtil.get(key);
+        Long count = cacheUtil.get(key);
         return count != null ? count : 0L;
     }
 
@@ -202,8 +200,8 @@ public class RateLimitServiceImpl implements RateLimitService {
     public void resetTokenCounts(Long tokenId) {
         String minuteKey = MINUTE_KEY_PREFIX + tokenId;
         String dayKey = DAY_KEY_PREFIX + tokenId;
-        redisUtil.delete(minuteKey);
-        redisUtil.delete(dayKey);
+        cacheUtil.delete(minuteKey);
+        cacheUtil.delete(dayKey);
         log.info("重置信令计数: tokenId={}", tokenId);
     }
 

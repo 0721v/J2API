@@ -1,5 +1,6 @@
 package com.apiplatform.service;
 
+import com.apiplatform.common.PageResult;
 import com.apiplatform.entity.UserGroup;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -42,7 +43,7 @@ public interface UserGroupService extends IService<UserGroup> {
     /**
      * 分页查询用户分组
      */
-    Page<UserGroup> getGroupPage(int page, int size, String keyword);
+    PageResult<UserGroup> getGroupPage(int page, int size, String keyword);
 
     /**
      * 将用户分配到分组

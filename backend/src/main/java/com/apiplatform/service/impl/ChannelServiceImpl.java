@@ -2,11 +2,9 @@ package com.apiplatform.service.impl;
 
 import com.apiplatform.common.*;
 import com.apiplatform.entity.Channel;
-import com.apiplatform.entity.Token;
 import com.apiplatform.mapper.ChannelMapper;
 import com.apiplatform.mapper.UsageLogMapper;
 import com.apiplatform.service.ChannelService;
-import com.apiplatform.service.TokenService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -34,7 +32,6 @@ public class ChannelServiceImpl extends ServiceImpl<ChannelMapper, Channel> impl
 
     private final ChannelMapper channelMapper;
     private final UsageLogMapper usageLogMapper;
-    private final TokenService tokenService;
 
     @Override
     @Transactional
@@ -242,7 +239,7 @@ public class ChannelServiceImpl extends ServiceImpl<ChannelMapper, Channel> impl
     public PageResult<Channel> pageChannels(int page, int size, String keyword, String type, String status) {
         Page<Channel> pageParam = new Page<>(page, size);
         IPage<Channel> pageResult = channelMapper.selectChannelPage(pageParam, keyword, type, status);
-        return PageResult.of(pageResult.getRecords(), pageResult.getTotal(), page, size);
+        return PageResult.of(pageResult.getRecords(), pageResult.getTotal(), (long) page, (long) size);
     }
 
     @Override

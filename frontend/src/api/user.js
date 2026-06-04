@@ -1,4 +1,4 @@
-import request from './request'
+﻿import request from '../utils/request'
 
 export function login(loginKey, password) {
   return request.post('/auth/login', { loginKey, password })
@@ -12,7 +12,7 @@ export function register(username, email, password, inviteCode = null) {
   return request.post('/auth/register', data)
 }
 
-// 邀请码相关 API
+// 閭€璇风爜鐩稿叧 API
 export function validateInviteCode(inviteCode) {
   return request.get('/auth/invite/validate', { params: { code: inviteCode } })
 }
@@ -72,3 +72,4 @@ export function getBalance() {
 export function getUserStats(params) {
   return request.get('/user/stats', { params })
 }
+

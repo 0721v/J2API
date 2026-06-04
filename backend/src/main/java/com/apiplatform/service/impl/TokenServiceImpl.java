@@ -18,6 +18,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +41,9 @@ public class TokenServiceImpl extends ServiceImpl<TokenMapper, Token> implements
     private final TokenGroupMapper tokenGroupMapper;
     private final UsageLogMapper usageLogMapper;
     private final ApiKeyUtil apiKeyUtil;
+    @Lazy
     private final RateLimitService rateLimitService;
+    @Lazy
     private final BillingService billingService;
 
     @Override
@@ -233,7 +236,7 @@ public class TokenServiceImpl extends ServiceImpl<TokenMapper, Token> implements
     public PageResult<Token> getUserTokens(Long userId, int page, int size) {
         Page<Token> pageParam = new Page<>(page, size);
         IPage<Token> pageResult = tokenMapper.selectByUserId(pageParam, userId);
-        return PageResult.of(pageResult.getRecords(), pageResult.getTotal(), page, size);
+        return PageResult.of(pageResult.getRecords(), pageResult.getTotal(), (long) page, (long) size);
     }
 
     @Override

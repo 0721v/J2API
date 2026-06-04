@@ -57,12 +57,10 @@ public interface ModelMapper extends BaseMapper<Model> {
     /**
      * 查询支持特定功能的模型
      */
-    @Select("<script>" +
-            "SELECT * FROM models WHERE enabled = true AND deleted = false " +
-            "<if test='supportsStreaming != null'> AND supports_streaming = #{supportsStreaming}</if>" +
-            "<if test='supportsFunctionCall != null'> AND supports_function_call = #{supportsFunctionCall}</if>" +
-            "<if test='supportsVision != null'> AND supports_vision = #{supportsVision}</if>" +
-            "</script>")
+    @Select("SELECT * FROM models WHERE enabled = true AND deleted = false" +
+            " AND (#{supportsStreaming} IS NULL OR supports_streaming = #{supportsStreaming})" +
+            " AND (#{supportsFunctionCall} IS NULL OR supports_function_call = #{supportsFunctionCall})" +
+            " AND (#{supportsVision} IS NULL OR supports_vision = #{supportsVision})")
     List<Model> selectByCapabilities(@Param("supportsStreaming") Boolean supportsStreaming,
                                      @Param("supportsFunctionCall") Boolean supportsFunctionCall,
                                      @Param("supportsVision") Boolean supportsVision);

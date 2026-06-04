@@ -6,6 +6,7 @@ import com.apiplatform.entity.UsageLog;
 import com.apiplatform.mapper.UsageLogMapper;
 import com.apiplatform.service.UsageLogService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -43,7 +44,7 @@ public class UsageLogServiceImpl extends ServiceImpl<UsageLogMapper, UsageLog> i
                                 String status, String errorMessage,
                                 String ipAddress, String requestPath) {
         
-        String requestId = IdUtil.fastUUID().toString(true);
+        String requestId = IdUtil.fastUUID();
 
         UsageLog usageLog = UsageLog.builder()
                 .requestId(requestId)
@@ -87,18 +88,22 @@ public class UsageLogServiceImpl extends ServiceImpl<UsageLogMapper, UsageLog> i
         stats.put("totalCalls", count(wrapper));
 
         // 总消费金额
-        wrapper.select("COALESCE(SUM(billed_amount), 0) as total");
-        Object amountObj = getBaseMapper().selectObjs(wrapper).stream().findFirst().orElse(0L);
+        QueryWrapper<UsageLog> qw = new QueryWrapper<>();
+        qw.select("COALESCE(SUM(billed_amount), 0) as total");
+        buildQueryWrapperTo(qw, userId, null, null, startTime, endTime);
+        qw.eq("status", "success");
+        Object amountObj = getBaseMapper().selectObjs(qw).stream().findFirst().orElse(0L);
         stats.put("totalAmount", amountObj);
 
         // 输入/输出Token
-        wrapper = buildQueryWrapper(userId, null, null, startTime, endTime);
-        wrapper.eq(UsageLog::getStatus, "success")
-                .select("COALESCE(SUM(request_tokens), 0) as input", 
-                        "COALESCE(SUM(response_tokens), 0) as output",
-                        "COALESCE(SUM(CASE WHEN cache_hit = true THEN 1 ELSE 0 END), 0) as cacheHits");
+        qw = new QueryWrapper<>();
+        qw.select("COALESCE(SUM(request_tokens), 0) as input", 
+                "COALESCE(SUM(response_tokens), 0) as output",
+                "COALESCE(SUM(CASE WHEN cache_hit = true THEN 1 ELSE 0 END), 0) as cacheHits");
+        buildQueryWrapperTo(qw, userId, null, null, startTime, endTime);
+        qw.eq("status", "success");
         
-        List<Object> result = getBaseMapper().selectObjs(wrapper);
+        List<Object> result = getBaseMapper().selectObjs(qw);
         if (!result.isEmpty() && result.get(0) instanceof Map) {
             @SuppressWarnings("unchecked")
             Map<String, Object> map = (Map<String, Object>) result.get(0);
@@ -113,14 +118,15 @@ public class UsageLogServiceImpl extends ServiceImpl<UsageLogMapper, UsageLog> i
     @Override
     public Map<String, Object> getTokenUsageStats(Long userId, LocalDateTime startTime, LocalDateTime endTime) {
         // 获取用户下所有令牌的统计数据
-        LambdaQueryWrapper<UsageLog> wrapper = buildQueryWrapper(userId, null, null, startTime, endTime);
-        wrapper.eq(UsageLog::getStatus, "success")
+        QueryWrapper<UsageLog> qw = new QueryWrapper<>();
+        buildQueryWrapperTo(qw, userId, null, null, startTime, endTime);
+        qw.eq("status", "success")
                 .select("token_id",
                         "COUNT(*) as calls",
                         "COALESCE(SUM(billed_amount), 0) as amount")
-                .groupBy(UsageLog::getTokenId);
+                .groupBy("token_id");
 
-        List<UsageLog> logs = list(wrapper);
+        List<Map<String, Object>> logs = getBaseMapper().selectMaps(qw);
         
         Map<String, Object> stats = new HashMap<>();
         stats.put("tokenStats", logs);
@@ -164,7 +170,7 @@ public class UsageLogServiceImpl extends ServiceImpl<UsageLogMapper, UsageLog> i
         Page<UsageLog> pageParam = new Page<>(page, size);
         IPage<UsageLog> pageResult = usageLogMapper.selectByUserId(
                 pageParam, userId, modelId, channelId, startTime, endTime);
-        return PageResult.of(pageResult.getRecords(), pageResult.getTotal(), page, size);
+        return PageResult.of(pageResult.getRecords(), pageResult.getTotal(), (long) page, (long) size);
     }
 
     @Override
@@ -226,5 +232,27 @@ public class UsageLogServiceImpl extends ServiceImpl<UsageLogMapper, UsageLog> i
         }
         
         return wrapper;
+    }
+
+    /**
+     * 构建查询条件（通用版本）
+     */
+    private void buildQueryWrapperTo(QueryWrapper<UsageLog> wrapper, Long userId, Long modelId, Long channelId,
+                                     LocalDateTime startTime, LocalDateTime endTime) {
+        if (userId != null) {
+            wrapper.eq("user_id", userId);
+        }
+        if (modelId != null) {
+            wrapper.eq("model_id", modelId);
+        }
+        if (channelId != null) {
+            wrapper.eq("channel_id", channelId);
+        }
+        if (startTime != null) {
+            wrapper.ge("created_at", startTime);
+        }
+        if (endTime != null) {
+            wrapper.le("created_at", endTime);
+        }
     }
 }

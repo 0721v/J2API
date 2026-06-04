@@ -3,7 +3,6 @@ package com.apiplatform.service;
 import com.apiplatform.entity.OAuthBinding;
 import com.apiplatform.entity.OAuthProvider;
 import com.apiplatform.entity.User;
-import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.Map;
 
@@ -12,7 +11,7 @@ import java.util.Map;
  *
  * @author API Platform Team
  */
-public interface OAuthService extends IService<Object> {
+public interface OAuthService {
 
     /**
      * 获取OAuth提供商配置

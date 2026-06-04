@@ -11,7 +11,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +36,6 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
     private final AgentWithdrawalMapper agentWithdrawalMapper;
     private final AgentCommissionRuleMapper agentCommissionRuleMapper;
     private final UserMapper userMapper;
-    private final RedisTemplate<String, String> redisTemplate;
 
     private static final String AGENT_CODE_PREFIX = "AG";
     private static final BigDecimal WITHDRAWAL_FEE_RATE = new BigDecimal("0.01"); // 1%手续费
@@ -212,20 +210,20 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
             agent.setUser(userMapper.selectById(agent.getUserId()));
         }
 
-        return new PageResult<>(result.getRecords(), result.getTotal());
+        return PageResult.of(result.getRecords(), result.getTotal());
     }
 
     @Override
     public PageResult<AgentCommission> listCommissions(Long userId, int page, int pageSize, String type) {
         Agent agent = baseMapper.selectByUserId(userId);
         if (agent == null) {
-            return new PageResult<>(List.of(), 0);
+            return PageResult.of(List.of(), 0L);
         }
 
         Page<AgentCommission> pageParam = new Page<>(page, pageSize);
         IPage<AgentCommission> result = agentCommissionMapper.selectByAgentId(pageParam, agent.getId(), type);
 
-        return new PageResult<>(result.getRecords(), result.getTotal());
+        return PageResult.of(result.getRecords(), result.getTotal());
     }
 
     @Override
@@ -270,7 +268,12 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
             case "bank" -> {
                 withdrawal.setBankName(accountInfo.get("bankName"));
                 withdrawal.setBankAccount(accountInfo.get("bankAccount"));
-                withdrawal.setBankBranch(accountInfo.get("bankBranch"));
+                // bankBranch 字段不存在，可以添加到 remark 中
+                String bankBranch = accountInfo.get("bankBranch");
+                if (bankBranch != null && !bankBranch.isEmpty()) {
+                    withdrawal.setRemark(withdrawal.getRemark() != null ? 
+                        withdrawal.getRemark() + " 开户行: " + bankBranch : "开户行: " + bankBranch);
+                }
             }
             case "alipay" -> withdrawal.setAlipayAccount(accountInfo.get("alipayAccount"));
             case "wechat" -> withdrawal.setWechatAccount(accountInfo.get("wechatAccount"));
@@ -303,13 +306,13 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
     public PageResult<AgentWithdrawal> listWithdrawals(Long userId, int page, int pageSize, String status) {
         Agent agent = baseMapper.selectByUserId(userId);
         if (agent == null) {
-            return new PageResult<>(List.of(), 0);
+            return PageResult.of(List.of(), 0L);
         }
 
         Page<AgentWithdrawal> pageParam = new Page<>(page, pageSize);
         IPage<AgentWithdrawal> result = agentWithdrawalMapper.selectByAgentId(pageParam, agent.getId(), status);
 
-        return new PageResult<>(result.getRecords(), result.getTotal());
+        return PageResult.of(result.getRecords(), result.getTotal());
     }
 
     @Override

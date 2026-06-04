@@ -41,7 +41,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
             record.setRead(existsRead(record.getId(), userId));
         }
 
-        return PageResult.of(records, total, page, pageSize);
+        return PageResult.of(records, total, (long) page, (long) pageSize);
     }
 
     @Override
@@ -80,7 +80,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
                         .orderByDesc(Announcement::getPriority)
                         .orderByDesc(Announcement::getCreatedAt)
         );
-        return PageResult.of(result.getRecords(), result.getTotal(), page, pageSize);
+        return PageResult.of(result.getRecords(), result.getTotal(), (long) page, (long) pageSize);
     }
 
     @Override
@@ -141,7 +141,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
         int offset = (page - 1) * pageSize;
         List<Announcement> records = announcementMapper.selectHistoryList(LocalDateTime.now(), pageSize, offset);
         long total = countHistoryTotal();
-        return PageResult.of(records, total, page, pageSize);
+        return PageResult.of(records, total, (long) page, (long) pageSize);
     }
 
     @Override

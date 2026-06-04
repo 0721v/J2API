@@ -3,6 +3,7 @@ package com.apiplatform.service.impl;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.apiplatform.common.BizException;
+import com.apiplatform.common.PageResult;
 import com.apiplatform.entity.Channel;
 import com.apiplatform.entity.Model;
 import com.apiplatform.entity.User;
@@ -12,13 +13,13 @@ import com.apiplatform.mapper.ModelMapper;
 import com.apiplatform.mapper.UserGroupMapper;
 import com.apiplatform.mapper.UserMapper;
 import com.apiplatform.service.UserGroupService;
+import com.apiplatform.util.CacheUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +44,7 @@ public class UserGroupServiceImpl extends ServiceImpl<UserGroupMapper, UserGroup
     private final UserMapper userMapper;
     private final ModelMapper modelMapper;
     private final ChannelMapper channelMapper;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final CacheUtil cacheUtil;
 
     @Value("${system.default-minute-limit:60}")
     private int defaultMinuteLimit;
@@ -159,7 +160,7 @@ public class UserGroupServiceImpl extends ServiceImpl<UserGroupMapper, UserGroup
     }
 
     @Override
-    public Page<UserGroup> getGroupPage(int page, int size, String keyword) {
+    public PageResult<UserGroup> getGroupPage(int page, int size, String keyword) {
         LambdaQueryWrapper<UserGroup> wrapper = new LambdaQueryWrapper<UserGroup>()
                 .eq(UserGroup::getDeleted, false)
                 .orderByDesc(UserGroup::getPriority);
@@ -181,7 +182,7 @@ public class UserGroupServiceImpl extends ServiceImpl<UserGroupMapper, UserGroup
             group.setUserCount((int) count);
         });
 
-        return result;
+        return PageResult.of(result.getRecords(), result.getTotal(), (long) page, (long) size);
     }
 
     @Override
@@ -229,7 +230,7 @@ public class UserGroupServiceImpl extends ServiceImpl<UserGroupMapper, UserGroup
     @Override
     public UserGroup getUserGroup(Long userId) {
         String cacheKey = USER_GROUP_CACHE_PREFIX + userId;
-        UserGroup cached = (UserGroup) redisTemplate.opsForValue().get(cacheKey);
+        UserGroup cached = cacheUtil.get(cacheKey);
         if (cached != null) {
             return cached;
         }
@@ -241,7 +242,7 @@ public class UserGroupServiceImpl extends ServiceImpl<UserGroupMapper, UserGroup
 
         UserGroup group = getById(user.getGroupId());
         if (group != null) {
-            redisTemplate.opsForValue().set(cacheKey, group, 30, TimeUnit.MINUTES);
+            cacheUtil.set(cacheKey, group, 30, TimeUnit.MINUTES);
         }
 
         return group;
@@ -250,7 +251,7 @@ public class UserGroupServiceImpl extends ServiceImpl<UserGroupMapper, UserGroup
     @Override
     public Map<String, Object> getUserQuota(Long userId) {
         String cacheKey = USER_QUOTA_CACHE_PREFIX + userId;
-        Map<String, Object> cached = (Map<String, Object>) redisTemplate.opsForValue().get(cacheKey);
+        Map<String, Object> cached = cacheUtil.get(cacheKey);
         if (cached != null) {
             return cached;
         }
@@ -299,7 +300,7 @@ public class UserGroupServiceImpl extends ServiceImpl<UserGroupMapper, UserGroup
             quota.put("groupLevelName", group.getLevelName());
         }
 
-        redisTemplate.opsForValue().set(cacheKey, quota, 15, TimeUnit.MINUTES);
+        cacheUtil.set(cacheKey, quota, 15, TimeUnit.MINUTES);
         return quota;
     }
 
@@ -340,9 +341,10 @@ public class UserGroupServiceImpl extends ServiceImpl<UserGroupMapper, UserGroup
 
     @Override
     public int getUserCountInGroup(Long groupId) {
-        return (int) userMapper.selectCount(new LambdaQueryWrapper<User>()
+        Long count = userMapper.selectCount(new LambdaQueryWrapper<User>()
                 .eq(User::getGroupId, groupId)
                 .eq(User::getDeleted, false));
+        return count != null ? count.intValue() : 0;
     }
 
     @Override
@@ -396,26 +398,16 @@ public class UserGroupServiceImpl extends ServiceImpl<UserGroupMapper, UserGroup
      * 清除用户缓存
      */
     private void clearUserCache(Long userId) {
-        redisTemplate.delete(USER_GROUP_CACHE_PREFIX + userId);
-        redisTemplate.delete(USER_QUOTA_CACHE_PREFIX + userId);
+        cacheUtil.delete(USER_GROUP_CACHE_PREFIX + userId);
+        cacheUtil.delete(USER_QUOTA_CACHE_PREFIX + userId);
     }
 
     /**
      * 清除所有用户缓存
      */
     private void clearUserCache() {
-        // 清除前缀匹配的所有缓存
-        try {
-            var keys = redisTemplate.keys(USER_GROUP_CACHE_PREFIX + "*");
-            if (keys != null && !keys.isEmpty()) {
-                redisTemplate.delete(keys);
-            }
-            keys = redisTemplate.keys(USER_QUOTA_CACHE_PREFIX + "*");
-            if (keys != null && !keys.isEmpty()) {
-                redisTemplate.delete(keys);
-            }
-        } catch (Exception e) {
-            log.warn("清除缓存失败: {}", e.getMessage());
-        }
+        // 内存缓存模式下，无法通过前缀删除，这里不做操作
+        // 缓存会自动过期
+        log.debug("缓存清除请求已接收（内存缓存模式下自动过期）");
     }
 }

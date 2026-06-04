@@ -1,9 +1,6 @@
-/frontend/node
-/frontend/node_modules
-/backend/.vscode/
-/backend/logs/
-/backend/target
-/backend/startup.log
-/backend/startup_new.log
-.gitignore
+frontend/node
+frontend/node_modules
+frontend/dist
+backend/target
 *.log
+*.yml

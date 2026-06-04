@@ -59,6 +59,21 @@ public class PageResult<T> implements Serializable {
     }
 
     /**
+     * 构建分页结果（简化版，自动计算页码）
+     */
+    public static <T> PageResult<T> of(List<T> records, long total) {
+        return PageResult.<T>builder()
+                .records(records)
+                .total(total)
+                .current(1L)
+                .size((long) records.size())
+                .pages(records.size() > 0 ? 1L : 0L)
+                .hasPrevious(false)
+                .hasNext(false)
+                .build();
+    }
+
+    /**
      * 构建空分页结果
      */
     public static <T> PageResult<T> empty(Long current, Long size) {

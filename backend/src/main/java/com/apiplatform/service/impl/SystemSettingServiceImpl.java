@@ -3,11 +3,11 @@ package com.apiplatform.service.impl;
 import com.apiplatform.entity.SystemSetting;
 import com.apiplatform.mapper.SystemSettingMapper;
 import com.apiplatform.service.SystemSettingService;
+import com.apiplatform.util.CacheUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 public class SystemSettingServiceImpl implements SystemSettingService {
 
     private final SystemSettingMapper systemSettingMapper;
-    private final RedisTemplate<String, String> redisTemplate;
+    private final CacheUtil cacheUtil;
 
     private static final String SETTINGS_CACHE_PREFIX = "system:setting:";
     private static final long CACHE_EXPIRE_HOURS = 24;
@@ -49,7 +49,7 @@ public class SystemSettingServiceImpl implements SystemSettingService {
     @Override
     public String getSetting(String key) {
         String cacheKey = SETTINGS_CACHE_PREFIX + key;
-        String cachedValue = redisTemplate.opsForValue().get(cacheKey);
+        String cachedValue = cacheUtil.get(cacheKey);
 
         if (cachedValue != null) {
             return cachedValue;
@@ -61,7 +61,7 @@ public class SystemSettingServiceImpl implements SystemSettingService {
 
         if (setting != null && setting.getSettingValue() != null) {
             String value = setting.getSettingValue();
-            redisTemplate.opsForValue().set(cacheKey, value, CACHE_EXPIRE_HOURS, TimeUnit.HOURS);
+            cacheUtil.set(cacheKey, value, CACHE_EXPIRE_HOURS, TimeUnit.HOURS);
             return value;
         }
 
@@ -85,7 +85,7 @@ public class SystemSettingServiceImpl implements SystemSettingService {
 
         // 清除缓存
         String cacheKey = SETTINGS_CACHE_PREFIX + key;
-        redisTemplate.delete(cacheKey);
+        cacheUtil.delete(cacheKey);
 
         log.info("系统设置已更新: {} = {}", key, value);
     }
@@ -112,7 +112,7 @@ public class SystemSettingServiceImpl implements SystemSettingService {
 
         // 清除缓存
         String cacheKey = SETTINGS_CACHE_PREFIX + key;
-        redisTemplate.delete(cacheKey);
+        cacheUtil.delete(cacheKey);
 
         log.info("系统设置已更新: {}/{} = {}", category, key, value);
     }
@@ -140,7 +140,7 @@ public class SystemSettingServiceImpl implements SystemSettingService {
 
             // 清除缓存
             String cacheKey = SETTINGS_CACHE_PREFIX + key;
-            redisTemplate.delete(cacheKey);
+            cacheUtil.delete(cacheKey);
 
             log.info("系统设置已重置: {}", key);
         }

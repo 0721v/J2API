@@ -221,7 +221,7 @@ public class ModelServiceImpl extends ServiceImpl<ModelMapper, Model> implements
     public PageResult<Model> pageModels(int page, int size, String keyword, String type, Boolean enabled) {
         Page<Model> pageParam = new Page<>(page, size);
         IPage<Model> pageResult = modelMapper.selectModelPage(pageParam, keyword, type, enabled);
-        return PageResult.of(pageResult.getRecords(), pageResult.getTotal(), page, size);
+        return PageResult.of(pageResult.getRecords(), pageResult.getTotal(), (long) page, (long) size);
     }
 
     @Override

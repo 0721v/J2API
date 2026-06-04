@@ -26,7 +26,7 @@
             >
               <div class="amount">¥{{ option.amount }}</div>
               <div v-if="option.bonus > 0" class="bonus">
-                <el-icon><Gift /></el-icon>
+                <el-icon><Star /></el-icon>
                 送 ¥{{ option.bonus }}
               </div>
               <div v-if="option.bonus > 0" class="tag">+{{ Math.round(option.bonus / option.amount * 100) }}%</div>
@@ -365,7 +365,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Check, CreditCard, InfoFilled, Gift, DocumentCopy } from '@element-plus/icons-vue'
+import { Check, CreditCard, InfoFilled, Star, DocumentCopy } from '@element-plus/icons-vue'
 import { getAmountOptions, getPaymentMethods, createRechargeOrder, getOrderStatus, getRechargeHistory } from '@/api/recharge'
 import QrcodeVue from 'qrcode.vue'
 

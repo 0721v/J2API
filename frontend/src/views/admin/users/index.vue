@@ -183,8 +183,7 @@
 </template>
 
 <script>
-import { getUserList } from '@/api/admin'
-import { updateUserStatus, rechargeUser } from '@/api/user'
+import { getUserList, updateUserStatus, rechargeUser } from '@/api/admin'
 
 export default {
   name: 'AdminUsers',

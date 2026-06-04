@@ -1,5 +1,6 @@
 package com.apiplatform.service;
 
+import com.apiplatform.common.PageResult;
 import com.apiplatform.entity.ApiProxy;
 import com.apiplatform.entity.ProxyResult;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -42,7 +43,7 @@ public interface ApiProxyService extends IService<ApiProxy> {
     /**
      * 分页查询代理
      */
-    Page<ApiProxy> getProxyPage(int page, int size, String keyword, String type);
+    PageResult<ApiProxy> getProxyPage(int page, int size, String keyword, String type);
 
     /**
      * 匹配请求获取代理

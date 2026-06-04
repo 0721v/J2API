@@ -92,8 +92,8 @@ public class DashboardController {
         
         // 获取渠道使用统计
         var channelStats = channelService.getChannelUsageStats(
-                startTime.atStartOfDay().toLocalDate().toEpochSecond(java.time.ZoneOffset.UTC) * 1000,
-                endTime.atStartOfDay().toLocalDate().toEpochSecond(java.time.ZoneOffset.UTC) * 1000
+                java.time.ZonedDateTime.of(startTime.toLocalDate(), java.time.LocalTime.MIN, java.time.ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                java.time.ZonedDateTime.of(endTime.toLocalDate(), java.time.LocalTime.MIN, java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
         );
         
         Map<String, Object> data = new HashMap<>();

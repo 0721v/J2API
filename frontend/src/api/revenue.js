@@ -1,87 +1,84 @@
-import request from './request'
+﻿import request from '../utils/request'
 
-// ==================== 营收统计API ====================
+// ==================== 钀ユ敹缁熻API ====================
 
 /**
- * 获取营收概览
+ * 鑾峰彇钀ユ敹姒傝
  */
 export function getRevenueOverview() {
   return request.get('/api/admin/revenue/overview')
 }
 
 /**
- * 获取今日营收
+ * 鑾峰彇浠婃棩钀ユ敹
  */
 export function getTodayRevenue() {
   return request.get('/api/admin/revenue/today')
 }
 
 /**
- * 获取本月营收
+ * 鑾峰彇鏈湀钀ユ敹
  */
 export function getMonthRevenue() {
   return request.get('/api/admin/revenue/month')
 }
 
 /**
- * 获取日营收趋势
- */
+ * 鑾峰彇鏃ヨ惀鏀惰秼鍔? */
 export function getDailyRevenueTrend(params) {
   return request.get('/api/admin/revenue/trend/daily', { params })
 }
 
 /**
- * 获取月营收趋势
- */
+ * 鑾峰彇鏈堣惀鏀惰秼鍔? */
 export function getMonthlyRevenueTrend(year) {
   return request.get('/api/admin/revenue/trend/monthly', { params: { year } })
 }
 
 /**
- * 按支付渠道统计
- */
+ * 鎸夋敮浠樻笭閬撶粺璁? */
 export function getRevenueByChannel(params) {
   return request.get('/api/admin/revenue/by-channel', { params })
 }
 
 /**
- * 按业务类型统计
- */
+ * 鎸変笟鍔＄被鍨嬬粺璁? */
 export function getRevenueByBusiness(params) {
   return request.get('/api/admin/revenue/by-business', { params })
 }
 
 /**
- * 获取订单统计
+ * 鑾峰彇璁㈠崟缁熻
  */
 export function getOrderStats(params) {
   return request.get('/api/admin/revenue/orders', { params })
 }
 
 /**
- * 获取付费用户统计
+ * 鑾峰彇浠樿垂鐢ㄦ埛缁熻
  */
 export function getPayingUserStats() {
   return request.get('/api/admin/revenue/users')
 }
 
 /**
- * 获取Top消费用户
+ * 鑾峰彇Top娑堣垂鐢ㄦ埛
  */
 export function getTopConsumers(limit = 10) {
   return request.get('/api/admin/revenue/top-users', { params: { limit } })
 }
 
 /**
- * 获取代理分成统计
+ * 鑾峰彇浠ｇ悊鍒嗘垚缁熻
  */
 export function getAgentCommissionStats() {
   return request.get('/api/admin/revenue/agent-commission')
 }
 
 /**
- * 获取年度报表
+ * 鑾峰彇骞村害鎶ヨ〃
  */
 export function getYearlyReport(year) {
   return request.get('/api/admin/revenue/yearly', { params: { year } })
 }
+

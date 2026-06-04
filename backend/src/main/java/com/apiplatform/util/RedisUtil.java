@@ -1,6 +1,7 @@
 package com.apiplatform.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
@@ -15,7 +16,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
-public class RedisUtil {
+@ConditionalOnProperty(name = "spring.data.redis.enabled", havingValue = "true", matchIfMissing = true)
+public class RedisUtil implements CacheUtil {
 
     private final RedisTemplate<String, Object> redisTemplate;
 

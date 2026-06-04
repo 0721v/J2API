@@ -1,6 +1,6 @@
-import request from './request'
+﻿import request from '../utils/request'
 
-// 用户分组管理 API
+// 鐢ㄦ埛鍒嗙粍绠＄悊 API
 
 export function getUserGroups(params) {
   return request.get('/user-groups', { params })
@@ -33,3 +33,4 @@ export function getUserGroupUsers(groupId, params) {
 export function getUserGroupOptions() {
   return request.get('/user-groups/options')
 }
+

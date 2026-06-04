@@ -1,4 +1,4 @@
-import request from './request'
+﻿import request from '../utils/request'
 
 export function getAmountOptions() {
   return request.get('/recharge/amount-options')
@@ -23,3 +23,4 @@ export function getRechargeHistory(params) {
 export function getRechargeStats(params) {
   return request.get('/recharge/stats', { params })
 }
+

@@ -62,7 +62,8 @@ public class CommissionSettlementServiceImpl
         BigDecimal baseRate = getBaseRate(rules, "recharge");
 
         // 逐级分配佣金
-        Long remainingAmount = amount;
+        BigDecimal amountBD = BigDecimal.valueOf(amount);
+        long remainingAmount = amount;
         for (int i = 0; i < Math.min(agentChain.size(), MAX_LEVEL); i++) {
             Agent agent = agentChain.get(i);
             if (!agent.isActive()) continue;
@@ -72,7 +73,7 @@ public class CommissionSettlementServiceImpl
             BigDecimal agentRate = getAgentEffectiveRate(agent, "recharge", baseRate);
             BigDecimal finalRate = levelRate.multiply(agentRate);
 
-            long commission = amount.multiply(finalRate)
+            long commission = amountBD.multiply(finalRate)
                     .setScale(0, RoundingMode.DOWN)
                     .longValue();
 
@@ -105,6 +106,8 @@ public class CommissionSettlementServiceImpl
 
         List<AgentCommissionRule> rules = commissionRuleMapper.selectActiveRulesByType("package");
         BigDecimal baseRate = getBaseRate(rules, "package");
+        BigDecimal amountBD = BigDecimal.valueOf(amount);
+        long remainingAmount = amount;
 
         for (int i = 0; i < Math.min(agentChain.size(), MAX_LEVEL); i++) {
             Agent agent = agentChain.get(i);
@@ -114,7 +117,7 @@ public class CommissionSettlementServiceImpl
             BigDecimal agentRate = getAgentEffectiveRate(agent, "package", baseRate);
             BigDecimal finalRate = levelRate.multiply(agentRate);
 
-            long commission = amount.multiply(finalRate)
+            long commission = amountBD.multiply(finalRate)
                     .setScale(0, RoundingMode.DOWN)
                     .longValue();
 
@@ -140,6 +143,7 @@ public class CommissionSettlementServiceImpl
 
         List<AgentCommissionRule> rules = commissionRuleMapper.selectActiveRulesByType("upgrade");
         BigDecimal baseRate = getBaseRate(rules, "upgrade");
+        BigDecimal amountBD = BigDecimal.valueOf(amount);
 
         for (int i = 0; i < Math.min(agentChain.size(), MAX_LEVEL); i++) {
             Agent agent = agentChain.get(i);
@@ -149,7 +153,7 @@ public class CommissionSettlementServiceImpl
             BigDecimal agentRate = getAgentEffectiveRate(agent, "upgrade", baseRate);
             BigDecimal finalRate = levelRate.multiply(agentRate);
 
-            long commission = amount.multiply(finalRate)
+            long commission = amountBD.multiply(finalRate)
                     .setScale(0, RoundingMode.DOWN)
                     .longValue();
 
@@ -332,6 +336,13 @@ public class CommissionSettlementServiceImpl
 
             return userInfo;
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public long countReferralUsers(Long agentId) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getInviterId, agentId);
+        return userMapper.selectCount(queryWrapper);
     }
 
     @Override

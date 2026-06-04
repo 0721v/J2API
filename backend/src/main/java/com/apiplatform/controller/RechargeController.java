@@ -71,7 +71,7 @@ public class RechargeController {
 
             // 创建本地订单
             String clientIp = "127.0.0.1";
-            Order order = orderService.createRechargeOrder(userId, request.getAmount(), request.getChannel(), clientIp);
+            Order order = orderService.createRechargeOrder(userId, BigDecimal.valueOf(request.getAmount()), request.getChannel(), clientIp);
 
             // 调用支付服务创建支付
             Map<String, Object> paymentResult = paymentAggregationService.createPayment(

@@ -3,7 +3,9 @@ package com.apiplatform.service.impl;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.apiplatform.common.BizException;
+import com.apiplatform.common.PageResult;
 import com.apiplatform.entity.ApiProxy;
+import com.apiplatform.entity.ProxyResult;
 import com.apiplatform.mapper.ApiProxyMapper;
 import com.apiplatform.service.ApiProxyService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -113,7 +115,7 @@ public class ApiProxyServiceImpl extends ServiceImpl<ApiProxyMapper, ApiProxy> i
     }
 
     @Override
-    public Page<ApiProxy> getProxyPage(int page, int size, String keyword, String type) {
+    public PageResult<ApiProxy> getProxyPage(int page, int size, String keyword, String type) {
         LambdaQueryWrapper<ApiProxy> wrapper = new LambdaQueryWrapper<ApiProxy>()
                 .eq(ApiProxy::getDeleted, false)
                 .orderByDesc(ApiProxy::getPriority)
@@ -130,7 +132,8 @@ public class ApiProxyServiceImpl extends ServiceImpl<ApiProxyMapper, ApiProxy> i
                     .like(ApiProxy::getTargetUrl, keyword));
         }
 
-        return page(new Page<>(page, size), wrapper);
+        Page<ApiProxy> pageResult = page(new Page<>(page, size), wrapper);
+        return PageResult.of(pageResult.getRecords(), pageResult.getTotal(), (long) page, (long) size);
     }
 
     @Override
@@ -198,9 +201,9 @@ public class ApiProxyServiceImpl extends ServiceImpl<ApiProxyMapper, ApiProxy> i
 
             return ProxyResult.builder()
                     .success(true)
-                    .status(response.getStatusCode().value())
+                    .statusCode(response.getStatusCode().value())
                     .body(responseBody)
-                    .headers(response.getHeaders())
+                    .headers(convertHeaders(response.getHeaders()))
                     .responseTime(responseTime)
                     .proxyId(proxy.getId())
                     .build();
@@ -282,6 +285,21 @@ public class ApiProxyServiceImpl extends ServiceImpl<ApiProxyMapper, ApiProxy> i
         return body;
     }
 
+    /**
+     * 转换HttpHeaders为Map
+     */
+    private Map<String, String> convertHeaders(HttpHeaders headers) {
+        Map<String, String> result = new java.util.HashMap<>();
+        if (headers != null) {
+            headers.forEach((key, values) -> {
+                if (!values.isEmpty()) {
+                    result.put(key, values.get(0));
+                }
+            });
+        }
+        return result;
+    }
+
     @Override
     public void incrementRequestCount(Long proxyId) {
         ApiProxy proxy = new ApiProxy();
@@ -290,7 +308,7 @@ public class ApiProxyServiceImpl extends ServiceImpl<ApiProxyMapper, ApiProxy> i
         updateById(proxy);
 
         // 原子递增计数
-        apiProxyMapper.incrementRequestCount(proxyId);
+        apiProxyMapper.incrementRequestCount(proxyId, LocalDateTime.now());
     }
 
     @Override
@@ -363,28 +381,5 @@ public class ApiProxyServiceImpl extends ServiceImpl<ApiProxyMapper, ApiProxy> i
         save(copy);
         log.info("复制API代理: {} -> {}", source.getName(), newName);
         return copy;
-    }
-
-    /**
-     * 代理结果
-     */
-    @lombok.Data
-    @lombok.Builder
-    public static class ProxyResult {
-        private boolean success;
-        private int status;
-        private String body;
-        private HttpHeaders headers;
-        private long responseTime;
-        private Long proxyId;
-        private String error;
-
-        public static ProxyResult error(int status, String error) {
-            return ProxyResult.builder()
-                    .success(false)
-                    .status(status)
-                    .error(error)
-                    .build();
-        }
     }
 }

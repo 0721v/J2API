@@ -18,6 +18,7 @@
     <name>API Platform Backend</name>
     <description>API聚合平台后端服务</description>
 
+
     <repositories>
         <repository>
             <id>alimaven</id>
@@ -44,7 +45,7 @@
         <frontend.node.version>v20.11.0</frontend.node.version>
         <frontend.npm.version>10.2.4</frontend.npm.version>
         <frontend.build.directory>${project.basedir}/../frontend</frontend.build.directory>
-        <frontend.output.directory>${project.basedir}/src/main/resources/static</frontend.output.directory>
+        <frontend.output.directory>${frontend.build.directory}/dist</frontend.output.directory>
     </properties>
 
     <dependencies>
@@ -222,6 +223,11 @@
             <resource>
                 <directory>src/main/resources</directory>
             </resource>
+            <!-- 前端构建产物 -->
+            <resource>
+                <directory>${frontend.output.directory}</directory>
+                <targetPath>static</targetPath>
+            </resource>
         </resources>
         
         <plugins>
@@ -234,8 +240,19 @@
                     <nodeVersion>${frontend.node.version}</nodeVersion>
                     <npmVersion>${frontend.npm.version}</npmVersion>
                     <workingDirectory>${frontend.build.directory}</workingDirectory>
+                    <installDirectory>${frontend.build.directory}</installDirectory>
+                    <nodeDownloadRoot>https://nodejs.org/dist/</nodeDownloadRoot>
                 </configuration>
                 <executions>
+                    <!-- 安装 Node.js 和 npm -->
+                    <execution>
+                        <id>install-node-and-npm</id>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                    </execution>
+                    
                     <!-- 安装依赖 -->
                     <execution>
                         <id>npm install</id>
@@ -245,6 +262,7 @@
                         <configuration>
                             <arguments>install</arguments>
                         </configuration>
+                        <phase>process-resources</phase>
                     </execution>
                     
                     <!-- 构建前端 -->
@@ -258,17 +276,29 @@
                         </configuration>
                         <phase>prepare-package</phase>
                     </execution>
-                    
-                    <!-- 复制构建产物到 static 目录 -->
+                </executions>
+            </plugin>
+
+            <!-- 复制前端构建产物到 static 目录 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
                     <execution>
                         <id>copy-frontend-dist</id>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
                         <phase>prepare-package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
                         <configuration>
-                            <executable>cmd</executable>
-                            <arguments>-c, xcopy /E /I /Y "${frontend.build.directory}\dist\*" "${frontend.output.directory}\"</arguments>
+                            <target>
+                                <copy todir="${frontend.output.directory}" overwrite="true" failonerror="false">
+                                    <fileset dir="${frontend.build.directory}/dist">
+                                        <include name="**/*"/>
+                                    </fileset>
+                                </copy>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>
@@ -286,6 +316,13 @@
                         </exclude>
                     </excludes>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <!-- Maven 编译器插件 -->
@@ -300,7 +337,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
+                            <version>1.18.30</version>
                         </path>
                         <path>
                             <groupId>org.mapstruct</groupId>
@@ -398,15 +435,28 @@
                                     <arguments>run build</arguments>
                                 </configuration>
                             </execution>
+                        </executions>
+                    </plugin>
+                    <!-- 复制前端构建产物到 static 目录 -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
                             <execution>
                                 <id>copy-frontend-dist</id>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
                                 <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
                                 <configuration>
-                                    <executable>sh</executable>
-                                    <arguments>-c, cp -r "${frontend.build.directory}/dist/"* "${frontend.output.directory}/"</arguments>
+                                    <target>
+                                        <copy todir="${frontend.output.directory}" overwrite="true" failonerror="false">
+                                            <fileset dir="${frontend.build.directory}/dist">
+                                                <include name="**/*"/>
+                                            </fileset>
+                                        </copy>
+                                    </target>
                                 </configuration>
                             </execution>
                         </executions>

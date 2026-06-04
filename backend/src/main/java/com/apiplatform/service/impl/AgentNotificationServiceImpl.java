@@ -53,7 +53,7 @@ public class AgentNotificationServiceImpl
     public PageResult<AgentNotification> getNotifications(Long agentId, int page, int pageSize) {
         Page<AgentNotification> pageParam = new Page<>(page, pageSize);
         IPage<AgentNotification> result = baseMapper.selectByAgentId(pageParam, agentId);
-        return new PageResult<>(result.getRecords(), result.getTotal());
+        return PageResult.of(result.getRecords(), result.getTotal(), (long) page, (long) pageSize);
     }
 
     @Override

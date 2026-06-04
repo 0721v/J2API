@@ -77,6 +77,42 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     @Transactional
+    public User register(String username, String email, String password, Long inviterId) {
+        // 检查邮箱是否已注册
+        User existingUser = userMapper.selectByEmail(email);
+        if (existingUser != null) {
+            throw BizException.emailExists();
+        }
+
+        // 检查用户名是否已存在
+        User existingUsername = userMapper.selectByUsername(username);
+        if (existingUsername != null) {
+            throw BizException.badRequest("用户名已被使用");
+        }
+
+        // 创建用户
+        User user = User.builder()
+                .username(username)
+                .email(email)
+                .password(encodePassword(password))
+                .displayName(username)
+                .balance(0L)
+                .totalConsumption(0L)
+                .role("user")
+                .status("active")
+                .emailVerified(false)
+                .preferredLanguage("zh-CN")
+                .preferredTheme("light")
+                .build();
+
+        userMapper.insert(user);
+        log.info("用户注册成功: {}, 邀请人: {}", username, inviterId);
+        
+        return user;
+    }
+
+    @Override
+    @Transactional
     public Map<String, Object> login(String loginKey, String password) {
         // 根据邮箱或用户名查询用户
         User user = userMapper.selectByEmail(loginKey);
@@ -278,7 +314,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public PageResult<User> pageUsers(int page, int size, String keyword) {
         Page<User> pageParam = new Page<>(page, size);
         IPage<User> pageResult = userMapper.selectUserPage(pageParam, keyword);
-        return PageResult.of(pageResult.getRecords(), pageResult.getTotal(), page, size);
+        return PageResult.of(pageResult.getRecords(), pageResult.getTotal(), (long) page, (long) size);
     }
 
     @Override
@@ -334,7 +370,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         stats.put("totalUsers", userMapper.selectTotalCount());
         stats.put("newUsersToday", userMapper.selectNewUserCount(LocalDateTime.now().toLocalDate().atStartOfDay()));
         stats.put("activeUsers", count(new LambdaQueryWrapper<User>().eq(User::getStatus, "active")));
-        stats.put("totalBalance", sum(new LambdaQueryWrapper<User>().eq(User::getStatus, "active"), User::getBalance));
+        
+        // 计算活跃用户余额总和
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<User>().eq(User::getStatus, "active");
+        Long totalBalance = userMapper.selectList(wrapper).stream()
+                .mapToLong(u -> u.getBalance() != null ? u.getBalance() : 0L)
+                .sum();
+        stats.put("totalBalance", totalBalance);
+        
         return stats;
     }
 

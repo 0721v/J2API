@@ -1,8 +1,11 @@
 # API Platform Backend Configuration
 # API聚合平台后端配置文件
+# 此文件包含所有环境共用的配置
+# 特定环境的配置请在 application-dev.yml 或 application-prod.yml 中定义
 
+# 服务器配置
 server:
-  port: 8080
+  port: ${SERVER_PORT:8088}
   servlet:
     context-path: /api
   compression:
@@ -10,6 +13,7 @@ server:
     mime-types: application/json,application/xml,text/html,text/xml,text/plain
     min-response-size: 1024
 
+# Spring配置
 spring:
   application:
     name: api-platform
@@ -20,28 +24,19 @@ spring:
       static-locations: classpath:/static/
       add-mappings: true
   
-  # 数据库配置
+  # 数据库基础配置（具体连接信息在各环境配置中）
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/api_platform?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
-    username: root
-    password: your_password
     hikari:
       minimum-idle: 5
-      maximum-pool-size: 20
       idle-timeout: 600000
       max-lifetime: 1800000
       connection-timeout: 30000
       pool-name: ApiPlatformHikariCP
   
-  # Redis配置
+  # Redis基础配置（具体连接信息在各环境配置中）
   data:
     redis:
-      host: localhost
-      port: 6379
-      password: your_redis_password
-      database: 0
-      timeout: 10000
       lettuce:
         pool:
           max-active: 8
@@ -51,36 +46,7 @@ spring:
       cache:
         ttl: 3600
   
-  # 安全配置
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${OAUTH2_ISSUER_URI:}
-      clients:
-        registration:
-          linuxdo:
-            client-id: ${LINUXDO_CLIENT_ID:}
-            client-secret: ${LINUXDO_CLIENT_SECRET:}
-            scope: read,user:email
-            authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-          telegram:
-            client-id: ${TELEGRAM_BOT_TOKEN:}
-            client-secret: ${TELEGRAM_BOT_TOKEN:}
-            scope: read
-            authorization-grant-type: client_credentials
-        provider:
-          linuxdo:
-            authorization-uri: https://connect.linux.do/oauth/authorize
-            token-uri: https://connect.linux.do/oauth/token
-            user-info-uri: https://connect.linux.do/oauth/userinfo
-            user-name-attribute: login
-          telegram:
-            authorization-uri: https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN:}/authorize
-            token-uri: https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN:}/token
-  
-  # 文件上传
+  # 文件上传配置
   servlet:
     multipart:
       enabled: true
@@ -118,10 +84,9 @@ mybatis-plus:
     cache-enabled: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
-# JWT配置
+# JWT基础配置（密钥在各环境配置中）
 jwt:
-  secret: ${JWT_SECRET:your-256-bit-secret-key-here-change-in-production}
-  expiration: 86400000  # 24小时
+  expiration: 86400000        # 24小时
   refresh-expiration: 604800000  # 7天
 
 # 系统配置
@@ -139,7 +104,7 @@ system:
   
   # 计费配置
   billing:
-    cache-hit-rate: 0.5  # 缓存命中率时的计费比例
+    cache-hit-rate: 0.5          # 缓存命中率时的计费比例
     enable-cache-billing: true
   
   # 限流配置
@@ -157,82 +122,33 @@ channels:
       multiplier: 2.0
       max-interval: 10000
 
-# ==================== 支付配置 ====================
+# 支付基础配置
 payment:
-  # 支付宝配置
+  # 支付宝基础配置
   alipay:
     enabled: false
-    mode: sandbox  # sandbox 或 production
-    app-id: ${ALIPAY_APP_ID:}
-    private-key: ${ALIPAY_PRIVATE_KEY:}
-    alipay-public-key: ${ALIPAY_PUBLIC_KEY:}
-    gateway: https://openapi-sandbox.dl.alipaydev.com/gateway.do
-    notify-url: ${APP_URL:http://localhost:8080}/api/recharge/callback/alipay
   
-  # 微信支付配置
+  # 微信支付基础配置
   wechat:
     enabled: false
-    environment: sandbox  # sandbox 或 production
-    app-id: ${WECHAT_APP_ID:}
-    mch-id: ${WECHAT_MCH_ID:}
-    api-key: ${WECHAT_API_KEY:}
-    cert-path: ${WECHAT_CERT_PATH:}
-    notify-url: ${APP_URL:http://localhost:8080}/api/recharge/callback/wechat
   
   # 欧易(OKX)加密货币配置
   okx:
     enabled: false
     endpoint: https://www.okx.com
-    api-key: ${OKX_API_KEY:}
-    secret-key: ${OKX_SECRET_KEY:}
-    passphrase: ${OKX_PASSPHRASE:}
-    receive-address: ${OKX_RECEIVE_ADDRESS:}  # 你的USDT收款地址(TRC20)
-    network: TRC20  # TRC20 或 ERC20
-    discount: 0.95  # 加密货币支付95折
+    network: TRC20              # TRC20 或 ERC20
+    discount: 0.95              # 加密货币支付95折
   
-  # Stripe配置
+  # Stripe基础配置
   stripe:
     enabled: false
-    secret-key: ${STRIPE_SECRET_KEY:}
-    publishable-key: ${STRIPE_PUBLISHABLE_KEY:}
-    webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
     currency: usd
-    success-url: ${APP_URL:http://localhost:3000}/recharge/success
-    cancel-url: ${APP_URL:http://localhost:3000}/recharge
   
-  # Creem配置
+  # Creem基础配置
   creem:
     enabled: false
-    api-key: ${CREEM_API_KEY:}
     endpoint: https://api.creem.io
     currency: usd
-    success-url: ${APP_URL:http://localhost:3000}/recharge/success
-    cancel-url: ${APP_URL:http://localhost:3000}/recharge
-    webhook-secret: ${CREEM_WEBHOOK_SECRET:}
-
-# 日志配置
-logging:
-  level:
-    root: INFO
-    com.apiplatform: DEBUG
-    com.apiplatform.mapper: DEBUG
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-  file:
-    name: logs/api-platform.log
-    max-size: 100MB
-    max-history: 30
-
-# OpenAPI配置
-springdoc:
-  api-docs:
-    path: /v3/api-docs
-    enabled: true
-  swagger-ui:
-    path: /swagger-ui.html
-    tags-sorter: alpha
-    operations-sorter: alpha
-    enabled: true
 
 # Actuator配置
 management:
@@ -243,42 +159,3 @@ management:
   endpoint:
     health:
       show-details: when-authorized
-
----
-# 开发环境配置
-spring:
-  config:
-    activate:
-      on-profile: dev
-  datasource:
-    url: jdbc:mysql://localhost:3306/api_platform_dev?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
-    username: root
-    password: root
-  data:
-    redis:
-      password:
-  
-  h2:
-    console:
-      enabled: false
-
-logging:
-  level:
-    com.apiplatform: DEBUG
-
----
-# 生产环境配置
-spring:
-  config:
-    activate:
-      on-profile: prod
-  datasource:
-    hikari:
-      maximum-pool-size: 50
-  logging:
-    level:
-      root: WARN
-      com.apiplatform: INFO
-  springdoc:
-    swagger-ui:
-      enabled: false

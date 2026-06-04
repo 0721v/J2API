@@ -1,10 +1,9 @@
 <template>
   <div class="admin-layout">
     <el-container>
-      <!-- 侧边栏 -->
+      <!-- 侧边�?-->
       <el-aside :width="isCollapse ? '64px' : '220px'" class="sidebar">
         <div class="logo">
-          <img v-if="!isCollapse" src="/logo.png" alt="Logo" />
           <span v-if="!isCollapse" class="logo-text">API Platform</span>
           <span v-else class="logo-text">API</span>
         </div>
@@ -24,7 +23,7 @@
             <span slot="title">{{ $t('admin.dashboard') }}</span>
           </el-menu-item>
 
-          <el-submenu index="channels">
+          <el-sub-menu index="channels">
             <template slot="title">
               <i class="el-icon-connection"></i>
               <span>{{ $t('admin.channels') }}</span>
@@ -32,9 +31,9 @@
             <el-menu-item index="/admin/channels">
               {{ $t('admin.channelList') }}
             </el-menu-item>
-          </el-submenu>
+          </el-sub-menu>
 
-          <el-submenu index="models">
+          <el-sub-menu index="models">
             <template slot="title">
               <i class="el-icon-cpu"></i>
               <span>{{ $t('admin.models') }}</span>
@@ -42,9 +41,9 @@
             <el-menu-item index="/admin/models">
               {{ $t('admin.modelList') }}
             </el-menu-item>
-          </el-submenu>
+          </el-sub-menu>
 
-          <el-submenu index="users">
+          <el-sub-menu index="users">
             <template slot="title">
               <i class="el-icon-user"></i>
               <span>{{ $t('admin.users') }}</span>
@@ -52,9 +51,9 @@
             <el-menu-item index="/admin/users">
               {{ $t('admin.userList') }}
             </el-menu-item>
-          </el-submenu>
+          </el-sub-menu>
 
-          <el-submenu index="orders">
+          <el-sub-menu index="orders">
             <template slot="title">
               <i class="el-icon-document"></i>
               <span>{{ $t('admin.orders') }}</span>
@@ -62,9 +61,9 @@
             <el-menu-item index="/admin/orders">
               {{ $t('admin.orderList') }}
             </el-menu-item>
-          </el-submenu>
+          </el-sub-menu>
 
-          <el-submenu index="packages">
+          <el-sub-menu index="packages">
             <template slot="title">
               <i class="el-icon-box"></i>
               <span>{{ $t('admin.packages') }}</span>
@@ -72,9 +71,9 @@
             <el-menu-item index="/admin/packages">
               {{ $t('admin.packageList') }}
             </el-menu-item>
-          </el-submenu>
+          </el-sub-menu>
 
-          <el-submenu index="settings">
+          <el-sub-menu index="settings">
             <template slot="title">
               <i class="el-icon-setting"></i>
               <span>{{ $t('admin.settings') }}</span>
@@ -88,9 +87,9 @@
             <el-menu-item index="/admin/customization">
               {{ $t('admin.customization') }}
             </el-menu-item>
-          </el-submenu>
+          </el-sub-menu>
 
-          <el-submenu index="user-management">
+          <el-sub-menu index="user-management">
             <template slot="title">
               <i class="el-icon-user-solid"></i>
               <span>{{ $t('admin.userManagement') }}</span>
@@ -98,9 +97,9 @@
             <el-menu-item index="/admin/user-groups">
               {{ $t('admin.userGroups') }}
             </el-menu-item>
-          </el-submenu>
+          </el-sub-menu>
 
-          <el-submenu index="proxy">
+          <el-sub-menu index="proxy">
             <template slot="title">
               <i class="el-icon-guide"></i>
               <span>{{ $t('admin.proxyManagement') }}</span>
@@ -108,9 +107,9 @@
             <el-menu-item index="/admin/proxies">
               {{ $t('admin.proxyList') }}
             </el-menu-item>
-          </el-submenu>
+          </el-sub-menu>
 
-          <el-submenu index="agent">
+          <el-sub-menu index="agent">
             <template slot="title">
               <i class="el-icon-s-marketing"></i>
               <span>{{ $t('admin.agentManagement') }}</span>
@@ -118,9 +117,9 @@
             <el-menu-item index="/admin/agents">
               {{ $t('admin.agentList') }}
             </el-menu-item>
-          </el-submenu>
+          </el-sub-menu>
 
-          <el-submenu index="announcement">
+          <el-sub-menu index="announcement">
             <template slot="title">
               <i class="el-icon-bell"></i>
               <span>公告管理</span>
@@ -128,7 +127,7 @@
             <el-menu-item index="/admin/announcements">
               公告列表
             </el-menu-item>
-          </el-submenu>
+          </el-sub-menu>
         </el-menu>
       </el-aside>
 

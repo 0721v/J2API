@@ -47,13 +47,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             throw BizException.invalidParameter("充值金额");
         }
 
-        String orderNo = "RC" + System.currentTimeMillis() + IdUtil.randomString(6);
+        String orderNo = "RC" + System.currentTimeMillis() + IdUtil.fastSimpleUUID().substring(0, 6);
         
         Order order = Order.builder()
                 .orderNo(orderNo)
                 .userId(userId)
                 .type("recharge")
-                .amount(amount.multiply(BigDecimal.valueOf(100)).longValue()) // 转换为分
+                .amount(amount.multiply(BigDecimal.valueOf(100))) // 转换为分
                 .paidAmount(BigDecimal.ZERO)
                 .paymentMethod(paymentMethod)
                 .status("pending")
@@ -75,14 +75,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             throw BizException.packageNotFound();
         }
 
-        String orderNo = "PK" + System.currentTimeMillis() + IdUtil.randomString(6);
+        String orderNo = "PK" + System.currentTimeMillis() + IdUtil.fastSimpleUUID().substring(0, 6);
         
         Order order = Order.builder()
                 .orderNo(orderNo)
                 .userId(userId)
                 .type("package")
                 .relatedId(packageId)
-                .amount(pkg.getPrice().multiply(BigDecimal.valueOf(100)).longValue())
+                .amount(pkg.getPrice().multiply(BigDecimal.valueOf(100)))
                 .paidAmount(BigDecimal.ZERO)
                 .paymentMethod(paymentMethod)
                 .status("pending")
@@ -123,7 +123,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         // 根据订单类型处理
         if ("recharge".equals(order.getType())) {
             // 充值：增加用户余额
-            userService.addBalance(order.getUserId(), order.getAmount());
+            userService.addBalance(order.getUserId(), order.getAmount().longValue());
         } else if ("package".equals(order.getType())) {
             // 套餐：创建用户套餐记录
             createUserPackage(order);
@@ -172,7 +172,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         updateById(order);
 
         // 退还余额
-        userService.addBalance(order.getUserId(), order.getRefundAmount().longValue());
+        userService.addBalance(order.getUserId(), order.getRefundAmount() != null ? order.getRefundAmount().longValue() : 0L);
 
         log.info("订单退款: orderNo={}, amount={}", orderNo, order.getRefundAmount());
     }
@@ -201,7 +201,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public PageResult<Order> getUserOrders(Long userId, int page, int size, String type) {
         Page<Order> pageParam = new Page<>(page, size);
         IPage<Order> pageResult = orderMapper.selectByUserId(pageParam, userId, type);
-        return PageResult.of(pageResult.getRecords(), pageResult.getTotal(), page, size);
+        return PageResult.of(pageResult.getRecords(), pageResult.getTotal(), (long) page, (long) size);
     }
 
     @Override
@@ -252,12 +252,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
         // 统计总金额
         wrapper.eq(Order::getStatus, "paid");
-        BigDecimal totalAmount = getBaseMapper()
-                .selectObjs(wrapper.select("SUM(paid_amount)"))
-                .stream()
-                .filter(obj -> obj != null)
-                .map(obj -> new BigDecimal(obj.toString()))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalAmount = orderMapper.sumPaidAmount(userId, startTime, endTime);
+        if (totalAmount == null) {
+            totalAmount = BigDecimal.ZERO;
+        }
         stats.put("totalAmount", totalAmount.longValue());
 
         // 日统计

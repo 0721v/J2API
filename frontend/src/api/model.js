@@ -1,4 +1,4 @@
-import request from './request'
+﻿import request from '../utils/request'
 
 export function getModels() {
   return request.get('/models')
@@ -19,3 +19,4 @@ export function getModel(modelId) {
 export function getModelPricing(modelId) {
   return request.get(`/models/${modelId}/pricing`)
 }
+

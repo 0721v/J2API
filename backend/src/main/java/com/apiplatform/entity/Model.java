@@ -201,6 +201,13 @@ public class Model {
     /**
      * 是否按次计费
      */
+    public boolean isPerCallBilling() {
+        return "per_request".equals(billingType) || (billingType == null && perRequestPrice.compareTo(BigDecimal.ZERO) > 0);
+    }
+
+    /**
+     * 是否按次计费
+     */
     public boolean isPerRequestBilling() {
         return "per_request".equals(billingType);
     }

@@ -88,6 +88,12 @@ public class User {
     /** 邀请码 */
     private String inviteCode;
 
+    /** 用户分组ID */
+    private Long groupId;
+
+    /** 分组过期时间 */
+    private LocalDateTime expireTime;
+
     /** 创建时间 */
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;

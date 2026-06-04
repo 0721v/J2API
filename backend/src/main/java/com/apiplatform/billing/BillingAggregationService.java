@@ -65,7 +65,7 @@ public class BillingAggregationService {
      * 根据模型名称计算费用
      */
     public BillingResult calculateByModelName(Long userId, String modelName, UsageLog usageLog) {
-        Model model = modelService.getByName(modelName);
+        Model model = modelService.getByModelId(modelName);
         if (model == null) {
             log.error("模型不存在: modelName={}", modelName);
             return BillingResult.error("模型不存在: " + modelName);
@@ -117,14 +117,14 @@ public class BillingAggregationService {
         // 根据计费类型填充额外信息
         switch (model.getBillingType()) {
             case BillingStrategy.TYPE_TOKEN:
-                info.setInputPrice(model.getInputPrice());
-                info.setOutputPrice(model.getOutputPrice());
+                info.setInputPrice(model.getInputPrice() != null ? model.getInputPrice().doubleValue() : null);
+                info.setOutputPrice(model.getOutputPrice() != null ? model.getOutputPrice().doubleValue() : null);
                 break;
             case BillingStrategy.TYPE_PER_REQUEST:
-                info.setPerRequestPrice(model.getPerRequestPrice());
+                info.setPerRequestPrice(model.getPerRequestPrice() != null ? model.getPerRequestPrice().doubleValue() : null);
                 break;
             case BillingStrategy.TYPE_PER_SECOND:
-                info.setPerSecondPrice(model.getPerSecondPrice());
+                info.setPerSecondPrice(model.getPerSecondPrice() != null ? model.getPerSecondPrice().doubleValue() : null);
                 info.setMediaType(model.getMediaType());
                 info.setMinBillableSeconds(model.getMinBillableSeconds());
                 info.setMaxBillableSeconds(model.getMaxBillableSeconds());
@@ -160,8 +160,8 @@ public class BillingAggregationService {
         switch (billingType) {
             case BillingStrategy.TYPE_TOKEN:
                 // Token计费：inputTokens:outputTokens
-                long inputTokens = usageLog.getInputTokens() != null ? usageLog.getInputTokens() : 0;
-                long outputTokens = usageLog.getOutputTokens() != null ? usageLog.getOutputTokens() : 0;
+                long inputTokens = usageLog.getRequestTokens() != null ? usageLog.getRequestTokens() : 0;
+                long outputTokens = usageLog.getResponseTokens() != null ? usageLog.getResponseTokens() : 0;
                 return inputTokens + outputTokens;
 
             case BillingStrategy.TYPE_PER_REQUEST:
@@ -175,19 +175,19 @@ public class BillingAggregationService {
 
             case BillingStrategy.TYPE_TIERED:
                 // 阶梯计费：使用累计用量或单次用量
-                Double tieredUsage = usageLog.getTieredUsage();
-                if (tieredUsage != null) {
-                    return tieredUsage;
+                Long tieredUsageLong = usageLog.getTieredUsage();
+                if (tieredUsageLong != null) {
+                    return tieredUsageLong.doubleValue();
                 }
                 // 默认使用token总量
-                long totalTokens = (usageLog.getInputTokens() != null ? usageLog.getInputTokens() : 0)
-                        + (usageLog.getOutputTokens() != null ? usageLog.getOutputTokens() : 0);
-                return totalTokens;
+                long totalTokens = (usageLog.getRequestTokens() != null ? usageLog.getRequestTokens() : 0)
+                        + (usageLog.getResponseTokens() != null ? usageLog.getResponseTokens() : 0);
+                return (double) totalTokens;
 
             default:
                 // 默认使用token总量
-                return (usageLog.getInputTokens() != null ? usageLog.getInputTokens() : 0)
-                        + (usageLog.getOutputTokens() != null ? usageLog.getOutputTokens() : 0);
+                return (double) ((usageLog.getRequestTokens() != null ? usageLog.getRequestTokens() : 0)
+                        + (usageLog.getResponseTokens() != null ? usageLog.getResponseTokens() : 0));
         }
     }
 

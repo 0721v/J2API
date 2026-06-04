@@ -51,7 +51,7 @@ public class ReportServiceImpl implements ReportService {
         wrapper.orderByDesc(ConsumptionRecord::getCreatedAt);
 
         IPage<ConsumptionRecord> result = consumptionRecordMapper.selectPage(new Page<>(page, pageSize), wrapper);
-        return PageResult.of(result.getRecords(), result.getTotal(), page, pageSize);
+        return PageResult.of(result.getRecords(), result.getTotal(), (long) page, (long) pageSize);
     }
 
     @Override
@@ -107,7 +107,7 @@ public class ReportServiceImpl implements ReportService {
         }).toList();
 
         long total = stats.size();
-        return PageResult.of(records, total, page, pageSize);
+        return PageResult.of(records, total, (long) page, (long) pageSize);
     }
 
     @Override

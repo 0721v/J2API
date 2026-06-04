@@ -45,7 +45,7 @@ public class MessageServiceImpl implements MessageService {
         wrapper.orderByDesc(Message::getCreatedAt);
 
         IPage<Message> result = messageMapper.selectPage(new Page<>(page, pageSize), wrapper);
-        return PageResult.of(result.getRecords(), result.getTotal(), page, pageSize);
+        return PageResult.of(result.getRecords(), result.getTotal(), (long) page, (long) pageSize);
     }
 
     @Override

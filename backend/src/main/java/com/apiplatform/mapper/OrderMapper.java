@@ -55,6 +55,18 @@ public interface OrderMapper extends BaseMapper<Order> {
     Long sumPaidAmountByUserId(@Param("userId") Long userId);
 
     /**
+     * 统计订单总金额（支持时间范围）
+     */
+    @Select("SELECT COALESCE(SUM(paid_amount), 0) FROM orders WHERE status = 'paid' AND deleted = false" +
+            " AND (#{userId} IS NULL OR user_id = #{userId})" +
+            " AND (#{startTime} IS NULL OR created_at >= #{startTime})" +
+            " AND (#{endTime} IS NULL OR created_at <= #{endTime})")
+    java.math.BigDecimal sumPaidAmount(
+            @Param("userId") Long userId,
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime);
+
+    /**
      * 按日期统计订单
      */
     @Select("SELECT DATE(created_at) as date, COUNT(*) as count, SUM(paid_amount) as amount " +

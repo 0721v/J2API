@@ -104,12 +104,11 @@ public class StripePaymentService implements PaymentService {
                     .putMetadata("userId", String.valueOf(userId))
                     .putMetadata("amount", String.valueOf(amount));
 
-            // 启用客户邮箱收集
-            SessionCreateParams.Builder.PaymentIntentDataBuilder intentBuilder = PaymentIntentData.builder()
-                    .putMetadata("orderNo", orderNo)
-                    .putMetadata("userId", String.valueOf(userId));
-
-            paramsBuilder.setPaymentIntentData(intentBuilder.build());
+            // TODO: Stripe SDK API 已变更，需要更新
+            // SessionCreateParams.Builder.PaymentIntentDataBuilder intentBuilder = PaymentIntentData.builder()
+            //         .putMetadata("orderNo", orderNo)
+            //         .putMetadata("userId", String.valueOf(userId));
+            // paramsBuilder.setPaymentIntentData(intentBuilder.build());
 
             // 启用保存卡片（可选）
             paramsBuilder.setBillingAddressCollection(SessionCreateParams.BillingAddressCollection.REQUIRED);

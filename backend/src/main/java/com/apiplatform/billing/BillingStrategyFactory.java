@@ -51,8 +51,8 @@ public class BillingStrategyFactory {
      * 创建Token计费策略
      */
     private static TokenBillingStrategy createTokenStrategy(Model model) {
-        double inputPrice = model.getInputPrice() != null ? model.getInputPrice() : 0.0;
-        double outputPrice = model.getOutputPrice() != null ? model.getOutputPrice() : 0.0;
+        double inputPrice = model.getInputPrice() != null ? model.getInputPrice().doubleValue() : 0.0;
+        double outputPrice = model.getOutputPrice() != null ? model.getOutputPrice().doubleValue() : 0.0;
         return new TokenBillingStrategy(inputPrice, outputPrice);
     }
 
@@ -60,7 +60,7 @@ public class BillingStrategyFactory {
      * 创建按次计费策略
      */
     private static PerRequestBillingStrategy createPerRequestStrategy(Model model) {
-        double price = model.getPerRequestPrice() != null ? model.getPerRequestPrice() : 0.0;
+        double price = model.getPerRequestPrice() != null ? model.getPerRequestPrice().doubleValue() : 0.0;
         return new PerRequestBillingStrategy(price);
     }
 
@@ -68,9 +68,9 @@ public class BillingStrategyFactory {
      * 创建按秒计费策略
      */
     private static PerSecondBillingStrategy createPerSecondStrategy(Model model) {
-        double price = model.getPerSecondPrice() != null ? model.getPerSecondPrice() : 0.0;
-        double minSeconds = model.getMinBillableSeconds() != null ? model.getMinBillableSeconds() : 1.0;
-        double maxSeconds = model.getMaxBillableSeconds() != null ? model.getMaxBillableSeconds() : 300.0;
+        double price = model.getPerSecondPrice() != null ? model.getPerSecondPrice().doubleValue() : 0.0;
+        double minSeconds = model.getMinBillableSeconds() != null ? model.getMinBillableSeconds().doubleValue() : 1.0;
+        double maxSeconds = model.getMaxBillableSeconds() != null ? model.getMaxBillableSeconds().doubleValue() : 300.0;
         String mediaType = model.getMediaType();
         if (mediaType == null) mediaType = "video";
 

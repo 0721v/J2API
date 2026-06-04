@@ -40,8 +40,8 @@ export default defineConfig({
     sourcemap: false,
     chunkSizeWarningLimit: 1500,
     // 打包资源基础路径
-    // 部署在根路径时使用 '/'，子路径时使用 '/子路径/'
-    base: process.env.VITE_BASE_URL || '/',
+    // 后端context-path是/api，所以前端资源需要放在/api路径下
+    base: '/api/',
     rollupOptions: {
       output: {
         // 静态资源输出到 assets 目录

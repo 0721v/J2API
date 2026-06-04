@@ -6,6 +6,7 @@ import com.apiplatform.mapper.UserMapper;
 import com.apiplatform.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +23,7 @@ import java.math.BigDecimal;
 public class BillingServiceImpl implements BillingService {
 
     private final UserService userService;
-    private final TokenService tokenService;
+    private final ObjectProvider<TokenService> tokenServiceProvider;
     private final ModelService modelService;
     private final ChannelService channelService;
     private final TransactionMapper transactionMapper;
@@ -85,14 +86,14 @@ public class BillingServiceImpl implements BillingService {
                 log.warn("令牌额度不足: tokenId={}", token.getId());
                 return false;
             }
-            tokenService.updateTokenQuota(token.getId(), amount);
+            tokenServiceProvider.getObject().updateTokenQuota(token.getId(), amount);
         }
 
         // 再扣除余额
         if (!userService.deductBalance(userId, amount)) {
             // 余额不足，返还额度
             if (token.hasQuotaLimit()) {
-                tokenService.updateTokenQuota(token.getId(), -amount);
+                tokenServiceProvider.getObject().updateTokenQuota(token.getId(), -amount);
             }
             log.warn("用户余额不足: userId={}, amount={}", userId, amount);
             return false;
@@ -105,7 +106,7 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     public boolean deductQuota(Long tokenId, Long amount) {
-        Token token = tokenService.getById(tokenId);
+        Token token = tokenServiceProvider.getObject().getById(tokenId);
         if (token == null) {
             return false;
         }
@@ -114,7 +115,7 @@ public class BillingServiceImpl implements BillingService {
             return false;
         }
 
-        tokenService.updateTokenQuota(tokenId, amount);
+        tokenServiceProvider.getObject().updateTokenQuota(tokenId, amount);
         return true;
     }
 

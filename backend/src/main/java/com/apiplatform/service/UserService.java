@@ -21,6 +21,11 @@ public interface UserService extends IService<User> {
     User register(String username, String email, String password);
 
     /**
+     * 用户注册（带邀请人）
+     */
+    User register(String username, String email, String password, Long inviterId);
+
+    /**
      * 用户登录
      */
     Map<String, Object> login(String loginKey, String password);

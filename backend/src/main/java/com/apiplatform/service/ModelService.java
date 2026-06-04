@@ -96,4 +96,9 @@ public interface ModelService extends IService<Model> {
      * 批量同步模型到缓存
      */
     void syncModelsToCache();
+
+    /**
+     * 获取启用的模型列表
+     */
+    List<Model> selectEnabled();
 }

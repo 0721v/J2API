@@ -1,6 +1,6 @@
-import request from './request'
+﻿import request from '../utils/request'
 
-// API 代理管理 API
+// API 浠ｇ悊绠＄悊 API
 
 export function getProxies(params) {
   return request.get('/proxies', { params })
@@ -37,3 +37,4 @@ export function getProxyLogs(proxyId, params) {
 export function getProxyStats(proxyId) {
   return request.get(`/proxies/${proxyId}/stats`)
 }
+
