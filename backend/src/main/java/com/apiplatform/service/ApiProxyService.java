@@ -1,6 +1,7 @@
 package com.apiplatform.service;
 
 import com.apiplatform.entity.ApiProxy;
+import com.apiplatform.entity.ProxyResult;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 

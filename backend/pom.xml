@@ -18,6 +18,19 @@
     <name>API Platform Backend</name>
     <description>API聚合平台后端服务</description>
 
+    <repositories>
+        <repository>
+            <id>alimaven</id>
+            <name>aliyun maven</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+        </repository>
+        <repository>
+            <id>central</id>
+            <name>Maven Central</name>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
+    </repositories>
+
     <properties>
         <java.version>17</java.version>
         <mybatis-plus.version>3.5.5</mybatis-plus.version>
@@ -25,7 +38,7 @@
         <hutool.version>5.8.24</hutool.version>
         <fastjson2.version>2.0.43</fastjson2.version>
         <springdoc.version>2.3.0</springdoc.version>
-        <alipay.sdk.version>4.35.129.ALL</alipay.sdk.version>
+        <alipay.sdk.version>4.31.0.ALL</alipay.sdk.version>
         <stripe.version>24.0.0</stripe.version>
         <!-- 前端构建配置 -->
         <frontend.node.version>v20.11.0</frontend.node.version>
@@ -48,7 +61,7 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mysql</artifactId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
 
         <dependency>
@@ -132,12 +145,14 @@
         </dependency>
 
         <!-- ==================== 支付SDK ==================== -->
-        <!-- 支付宝SDK -->
+        <!-- 支付宝SDK - 暂注释，需手动下载安装 -->
+        <!-- 
         <dependency>
             <groupId>com.alipay.sdk</groupId>
-            <artifactId>alipay-easysdk</artifactId>
-            <version>${alipay.sdk.version}</version>
+            <artifactId>alipay-sdk-java</artifactId>
+            <version>4.18.100.ALL</version>
         </dependency>
+        -->
 
         <!-- Stripe SDK -->
         <dependency>
@@ -316,15 +331,26 @@
         <!-- 仅后端构建：跳过前端（开发时使用） -->
         <profile>
             <id>backend-only</id>
+            <properties>
+                <skip.frontend>true</skip.frontend>
+            </properties>
             <build>
                 <plugins>
-                    <!-- 跳过前端构建插件 -->
                     <plugin>
                         <groupId>com.github.eirslett</groupId>
                         <artifactId>frontend-maven-plugin</artifactId>
                         <version>1.15.0</version>
                         <executions>
                             <execution>
+                                <id>npm install</id>
+                                <phase>none</phase>
+                            </execution>
+                            <execution>
+                                <id>npm build</id>
+                                <phase>none</phase>
+                            </execution>
+                            <execution>
+                                <id>copy-frontend-dist</id>
                                 <phase>none</phase>
                             </execution>
                         </executions>

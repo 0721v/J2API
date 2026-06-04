@@ -1,5 +1,6 @@
 package com.apiplatform.mapper;
 
+import com.apiplatform.entity.Agent;
 import com.apiplatform.entity.AgentCommission;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
