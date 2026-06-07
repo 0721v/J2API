@@ -5,9 +5,6 @@ import com.apiplatform.common.Result;
 import com.apiplatform.entity.OAuthBinding;
 import com.apiplatform.entity.OAuthProvider;
 import com.apiplatform.service.OAuthService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +21,6 @@ import java.util.*;
 @RestController
 @RequestMapping("/auth/oauth")
 @RequiredArgsConstructor
-@Tag(name = "OAuth授权", description = "第三方OAuth授权登录接口")
 public class OAuthController {
 
     private final OAuthService oAuthService;
@@ -33,7 +29,6 @@ public class OAuthController {
      * 获取OAuth提供商列表
      */
     @GetMapping("/providers")
-    @Operation(summary = "获取OAuth提供商", description = "获取当前可用的OAuth登录提供商列表")
     public Result<List<Map<String, Object>>> getProviders() {
         List<OAuthProvider> providers = Arrays.asList(
                 getLinuxDoProvider(),
@@ -58,7 +53,6 @@ public class OAuthController {
      * 获取OAuth授权URL
      */
     @GetMapping("/authorize/{provider}")
-    @Operation(summary = "获取授权URL", description = "获取指定OAuth提供商的授权跳转URL")
     public Result<Map<String, String>> getAuthorizationUrl(
             @PathVariable String provider,
             @RequestParam(required = false) String redirectUri) {
@@ -79,7 +73,6 @@ public class OAuthController {
      * OAuth回调处理
      */
     @GetMapping("/callback/{provider}")
-    @Operation(summary = "OAuth回调", description = "处理OAuth提供商授权回调")
     public Result<Map<String, Object>> callback(
             @PathVariable String provider,
             @RequestParam(required = false) String code,
@@ -93,10 +86,8 @@ public class OAuthController {
     }
 
     /**
-     * OAuth POST回调处理（部分提供商使用POST）
-     */
+     * OAuth POST回调处理（部分提供商使用POST�?     */
     @PostMapping("/callback/{provider}")
-    @Operation(summary = "OAuth POST回调", description = "处理OAuth提供商POST方式授权回调")
     public Result<Map<String, Object>> postCallback(
             @PathVariable String provider,
             @RequestBody Map<String, String> params) {
@@ -114,7 +105,6 @@ public class OAuthController {
      * Telegram Mini App登录
      */
     @PostMapping("/telegram/login")
-    @Operation(summary = "Telegram登录", description = "使用Telegram Mini App进行登录")
     public Result<Map<String, Object>> telegramLogin(@RequestBody TelegramLoginRequest request) {
         try {
             // Telegram登录需要验证initData
@@ -129,9 +119,8 @@ public class OAuthController {
      * 绑定OAuth账户
      */
     @PostMapping("/bind/{provider}")
-    @Operation(summary = "绑定OAuth账户", description = "将OAuth账户绑定到当前用户")
     public Result<Void> bindAccount(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @PathVariable String provider,
             @RequestBody BindAccountRequest request) {
         if (userId == null) {
@@ -150,9 +139,8 @@ public class OAuthController {
      * 解除OAuth绑定
      */
     @DeleteMapping("/unbind/{provider}")
-    @Operation(summary = "解除OAuth绑定", description = "解除当前用户的OAuth账户绑定")
     public Result<Void> unbindAccount(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @PathVariable String provider) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
@@ -170,9 +158,8 @@ public class OAuthController {
      * 获取用户已绑定的OAuth账户列表
      */
     @GetMapping("/bindings")
-    @Operation(summary = "获取绑定列表", description = "获取当前用户已绑定的OAuth账户列表")
     public Result<List<Map<String, Object>>> getBindings(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId) {
+            @RequestAttribute(value = "userId", required = false) Long userId) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
         }

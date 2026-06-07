@@ -8,9 +8,6 @@ import com.apiplatform.service.OrderService;
 import com.apiplatform.service.PaymentAggregationService;
 import com.apiplatform.service.PaymentService;
 import com.apiplatform.service.UserService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +29,6 @@ import java.util.*;
 @RestController
 @RequestMapping("/recharge")
 @RequiredArgsConstructor
-@Tag(name = "充值与订单", description = "充值和订单管理相关接口")
 public class RechargeController {
 
     private final OrderService orderService;
@@ -45,7 +41,6 @@ public class RechargeController {
      * 获取可用的支付渠道
      */
     @GetMapping("/channels")
-    @Operation(summary = "获取支付渠道", description = "获取当前可用的支付渠道列表")
     public Result<List<Map<String, Object>>> getPaymentChannels() {
         List<Map<String, Object>> channels = paymentAggregationService.getEnabledChannels();
         return Result.success(channels);
@@ -55,9 +50,8 @@ public class RechargeController {
      * 创建充值订单
      */
     @PostMapping("/create")
-    @Operation(summary = "创建充值订单", description = "创建充值订单并获取支付信息")
     public Result<Map<String, Object>> createRechargeOrder(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @Validated @RequestBody CreateRechargeRequest request) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
@@ -66,7 +60,7 @@ public class RechargeController {
         try {
             // 验证金额
             if (request.getAmount() <= 0) {
-                return Result.validateFailed("充值金额必须大于0");
+                return Result.validateFailed("充值金额必须大�?");
             }
 
             // 创建本地订单
@@ -96,18 +90,16 @@ public class RechargeController {
         } catch (BizException e) {
             return Result.error(e.getCode(), e.getMessage());
         } catch (Exception e) {
-            log.error("创建充值订单失败: {}", e.getMessage());
-            return Result.error("创建充值订单失败: " + e.getMessage());
+            log.error("创建充值订单失败 {}", e.getMessage());
+            return Result.error("创建充值订单失败 " + e.getMessage());
         }
     }
 
     /**
-     * 查询充值订单状态
-     */
+     * 查询充值订单状�?     */
     @GetMapping("/status/{orderNo}")
-    @Operation(summary = "查询订单状态", description = "查询指定订单的支付状态")
     public Result<Map<String, Object>> getOrderStatus(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @PathVariable String orderNo) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
@@ -136,12 +128,10 @@ public class RechargeController {
     }
 
     /**
-     * 获取充值历史
-     */
+     * 获取充值历�?     */
     @GetMapping("/history")
-    @Operation(summary = "获取充值历史", description = "获取用户的充值记录")
     public Result<PageResult<Order>> getRechargeHistory(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
         if (userId == null) {
@@ -156,9 +146,8 @@ public class RechargeController {
      * 获取订单统计
      */
     @GetMapping("/stats")
-    @Operation(summary = "获取充值统计", description = "获取用户的充值统计信息")
     public Result<Map<String, Object>> getRechargeStats(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
         if (userId == null) {
@@ -176,9 +165,8 @@ public class RechargeController {
      * 取消订单
      */
     @PostMapping("/cancel/{orderNo}")
-    @Operation(summary = "取消订单", description = "取消未支付的订单")
     public Result<Void> cancelOrder(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @PathVariable String orderNo) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
@@ -198,9 +186,8 @@ public class RechargeController {
      * 支付宝回调
      */
     @PostMapping("/callback/alipay")
-    @Operation(summary = "支付宝回调", description = "接收支付宝支付结果回调")
     public String alipayCallback(@RequestBody Map<String, String> params) {
-        log.info("支付宝回调: {}", params);
+        log.info("支付宝回调 {}", params);
 
         try {
             if (!paymentAggregationService.verifyCallback(PaymentService.CHANNEL_ALIPAY, params)) {
@@ -216,12 +203,12 @@ public class RechargeController {
                 String orderNo = (String) result.get("orderNo");
                 String transactionId = (String) result.get("transactionId");
                 orderService.handlePaymentCallback(orderNo, PaymentService.STATUS_PAID, transactionId);
-                log.info("支付宝支付成功处理: orderNo={}", orderNo);
+                log.info("支付宝支付成功处�? orderNo={}", orderNo);
             }
 
             return "success";
         } catch (Exception e) {
-            log.error("处理支付宝回调异常: {}", e.getMessage());
+            log.error("处理支付宝回调异�? {}", e.getMessage());
             return "fail";
         }
     }
@@ -230,7 +217,6 @@ public class RechargeController {
      * 微信支付回调
      */
     @PostMapping("/callback/wechat")
-    @Operation(summary = "微信支付回调", description = "接收微信支付结果回调")
     public String wechatCallback(@RequestBody Map<String, String> params) {
         log.info("微信支付回调: {}", params);
 
@@ -262,7 +248,6 @@ public class RechargeController {
      * 欧易(OKX)加密货币回调
      */
     @PostMapping("/callback/okx")
-    @Operation(summary = "OKX加密货币回调", description = "接收OKX链上交易回调")
     public String okxCallback(@RequestBody Map<String, String> params) {
         log.info("OKX加密货币回调: {}", params);
 
@@ -294,7 +279,6 @@ public class RechargeController {
      * Stripe Webhook回调
      */
     @PostMapping("/callback/stripe")
-    @Operation(summary = "Stripe回调", description = "接收Stripe Webhook回调")
     public String stripeCallback(
             @RequestBody String payload,
             @RequestHeader(value = "Stripe-Signature", required = false) String signature) {
@@ -328,7 +312,6 @@ public class RechargeController {
      * Creem Webhook回调
      */
     @PostMapping("/callback/creem")
-    @Operation(summary = "Creem回调", description = "接收Creem Webhook回调")
     public String creemCallback(
             @RequestBody String payload,
             @RequestHeader(value = "X-Creem-Signature", required = false) String signature) {
@@ -361,9 +344,8 @@ public class RechargeController {
      * 模拟回调（用于测试）
      */
     @PostMapping("/callback/simulate/{orderNo}")
-    @Operation(summary = "模拟支付回调", description = "模拟支付成功回调（仅测试环境使用）")
     public Result<Void> simulateCallback(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @PathVariable String orderNo) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
@@ -382,13 +364,12 @@ public class RechargeController {
         }
     }
 
-    // ==================== 充值渠道配置 ====================
+    // ==================== 充值渠道配�?====================
 
     /**
      * 获取可用支付方式
      */
     @GetMapping("/payment-methods")
-    @Operation(summary = "获取支付方式", description = "获取当前可用的支付方式列表")
     public Result<List<Map<String, Object>>> getPaymentMethods() {
         List<Map<String, Object>> methods = paymentAggregationService.getEnabledChannels();
         return Result.success(methods);
@@ -398,16 +379,15 @@ public class RechargeController {
      * 获取充值金额选项
      */
     @GetMapping("/amount-options")
-    @Operation(summary = "获取充值金额选项", description = "获取预设的充值金额选项")
     public Result<List<Map<String, Object>>> getAmountOptions() {
         List<Map<String, Object>> options = List.of(
                 Map.of("amount", 10, "bonus", 0, "label", "¥10"),
                 Map.of("amount", 50, "bonus", 0, "label", "¥50"),
                 Map.of("amount", 100, "bonus", 0, "label", "¥100"),
-                Map.of("amount", 200, "bonus", 10, "label", "¥200 (送¥10)"),
-                Map.of("amount", 500, "bonus", 50, "label", "¥500 (送¥50)"),
-                Map.of("amount", 1000, "bonus", 150, "label", "¥1000 (送¥150)"),
-                Map.of("amount", 2000, "bonus", 400, "label", "¥2000 (送¥400)")
+                Map.of("amount", 200, "bonus", 10, "label", "¥200 (送�?0)"),
+                Map.of("amount", 500, "bonus", 50, "label", "¥500 (送�?0)"),
+                Map.of("amount", 1000, "bonus", 150, "label", "¥1000 (送�?50)"),
+                Map.of("amount", 2000, "bonus", 400, "label", "¥2000 (送�?00)")
         );
         return Result.success(options);
     }

@@ -1,124 +1,126 @@
-﻿import request from '../utils/request'
+import request from '../utils/request'
 
-// ==================== 鍏憡API ====================
+// ==================== 公告API ====================
 
 /**
- * 鑾峰彇鍏憡鍒楄〃
+ * 获取公告列表
  */
 export function getAnnouncements(params) {
-  return request.get('/api/announcements', { params })
+  return request.get('/announcements', { params })
 }
 
 /**
- * 鑾峰彇鍏憡璇︽儏
+ * 获取公告详情
  */
 export function getAnnouncementDetail(id) {
-  return request.get(`/api/announcements/${id}`)
+  return request.get(`/announcements/${id}`)
 }
 
 /**
- * 鑾峰彇鏈鍏憡鏁伴噺
+ * 获取未读公告数量
  */
 export function getUnreadAnnouncementCount() {
-  return request.get('/api/announcements/unread-count')
+  return request.get('/announcements/unread-count')
 }
 
 /**
- * 鏍囪鍏憡宸茶
+ * 标记公告已读
  */
 export function markAnnouncementRead(id) {
-  return request.post(`/api/announcements/${id}/read`)
+  return request.post(`/announcements/${id}/read`)
 }
 
-// ==================== 娑堟伅API ====================
+// ==================== 消息API ====================
 
 /**
- * 鑾峰彇娑堟伅鍒楄〃
+ * 获取消息列表
  */
 export function getMessages(params) {
-  return request.get('/api/messages', { params })
+  return request.get('/messages', { params })
 }
 
 /**
- * 鑾峰彇鏈娑堟伅鏁伴噺
+ * 获取未读消息数量
  */
 export function getUnreadMessageCount() {
-  return request.get('/api/messages/unread-count')
+  return request.get('/messages/unread-count')
 }
 
 /**
- * 鏍囪娑堟伅宸茶
+ * 标记消息已读
  */
 export function markMessageRead(id) {
-  return request.post(`/api/messages/${id}/read`)
+  return request.post(`/messages/${id}/read`)
 }
 
 /**
- * 鏍囪鎵€鏈夋秷鎭凡璇? */
+ * 标记所有消息已读
+ */
 export function markAllMessagesRead() {
-  return request.post('/api/messages/read-all')
+  return request.post('/messages/read-all')
 }
 
 /**
- * 鍒犻櫎娑堟伅
+ * 删除消息
  */
 export function deleteMessage(id) {
-  return request.delete(`/api/messages/${id}`)
+  return request.delete(`/messages/${id}`)
 }
 
-// ==================== 鎶ヨ〃API ====================
+// ==================== 报表API ====================
 
 /**
- * 鑾峰彇娑堣垂璁板綍
+ * 获取消费记录
  */
 export function getConsumptionRecords(params) {
-  return request.get('/api/reports/consumption', { params })
+  return request.get('/reports/consumption', { params })
 }
 
 /**
- * 鑾峰彇娑堣垂姹囨€? */
+ * 获取消费汇总
+ */
 export function getConsumptionSummary(params) {
-  return request.get('/api/reports/consumption/summary', { params })
+  return request.get('/reports/consumption/summary', { params })
 }
 
 /**
- * 鎸夌被鍨嬬粺璁℃秷璐? */
+ * 按类型统计消费
+ */
 export function getConsumptionByType(params) {
-  return request.get('/api/reports/consumption/by-type', { params })
+  return request.get('/reports/consumption/by-type', { params })
 }
 
 /**
- * 鑾峰彇娑堣垂瓒嬪娍
+ * 获取消费趋势
  */
 export function getConsumptionTrend(params) {
-  return request.get('/api/reports/consumption/trend', { params })
+  return request.get('/reports/consumption/trend', { params })
 }
 
 /**
- * 鑾峰彇姣忔棩缁熻
+ * 获取每日统计
  */
 export function getDailyStats(params) {
-  return request.get('/api/reports/daily', { params })
+  return request.get('/reports/daily', { params })
 }
 
 /**
- * 鑾峰彇鏁翠綋缁熻
+ * 获取整体统计
  */
 export function getOverallStats() {
-  return request.get('/api/reports/overall')
+  return request.get('/reports/overall')
 }
 
 /**
- * 鑾峰彇鏈湀缁熻
+ * 获取本月统计
  */
 export function getMonthStats() {
-  return request.get('/api/reports/month')
+  return request.get('/reports/month')
 }
 
 /**
- * 鑾峰彇浠婃棩缁熻
+ * 获取今日统计
  */
 export function getTodayStats() {
-  return request.get('/api/reports/today')
+  return request.get('/reports/today')
 }
-

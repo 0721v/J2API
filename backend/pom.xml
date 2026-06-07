@@ -38,14 +38,8 @@
         <jwt.version>0.12.3</jwt.version>
         <hutool.version>5.8.24</hutool.version>
         <fastjson2.version>2.0.43</fastjson2.version>
-        <springdoc.version>2.3.0</springdoc.version>
         <alipay.sdk.version>4.31.0.ALL</alipay.sdk.version>
         <stripe.version>24.0.0</stripe.version>
-        <!-- 前端构建配置 -->
-        <frontend.node.version>v20.11.0</frontend.node.version>
-        <frontend.npm.version>10.2.4</frontend.npm.version>
-        <frontend.build.directory>${project.basedir}/../frontend</frontend.build.directory>
-        <frontend.output.directory>${frontend.build.directory}/dist</frontend.output.directory>
     </properties>
 
     <dependencies>
@@ -145,16 +139,6 @@
             <artifactId>httpclient5</artifactId>
         </dependency>
 
-        <!-- ==================== 支付SDK ==================== -->
-        <!-- 支付宝SDK - 暂注释，需手动下载安装 -->
-        <!-- 
-        <dependency>
-            <groupId>com.alipay.sdk</groupId>
-            <artifactId>alipay-sdk-java</artifactId>
-            <version>4.18.100.ALL</version>
-        </dependency>
-        -->
-
         <!-- Stripe SDK -->
         <dependency>
             <groupId>com.stripe</groupId>
@@ -168,12 +152,6 @@
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
 
-        <!-- OpenAPI / Swagger -->
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>${springdoc.version}</version>
-        </dependency>
 
         <!-- Lombok -->
         <dependency>
@@ -202,6 +180,13 @@
             <artifactId>caffeine</artifactId>
         </dependency>
 
+        <!-- Swagger / OpenAPI (Spring Boot 3.x compatible) -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+
         <!-- MapStruct for object mapping -->
         <dependency>
             <groupId>org.mapstruct</groupId>
@@ -218,92 +203,13 @@
     </dependencies>
 
     <build>
-        <!-- 前端资源输出目录 -->
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
             </resource>
-            <!-- 前端构建产物 -->
-            <resource>
-                <directory>${frontend.output.directory}</directory>
-                <targetPath>static</targetPath>
-            </resource>
         </resources>
         
         <plugins>
-            <!-- ==================== 前端构建插件 ==================== -->
-            <plugin>
-                <groupId>com.github.eirslett</groupId>
-                <artifactId>frontend-maven-plugin</artifactId>
-                <version>1.15.0</version>
-                <configuration>
-                    <nodeVersion>${frontend.node.version}</nodeVersion>
-                    <npmVersion>${frontend.npm.version}</npmVersion>
-                    <workingDirectory>${frontend.build.directory}</workingDirectory>
-                    <installDirectory>${frontend.build.directory}</installDirectory>
-                    <nodeDownloadRoot>https://nodejs.org/dist/</nodeDownloadRoot>
-                </configuration>
-                <executions>
-                    <!-- 安装 Node.js 和 npm -->
-                    <execution>
-                        <id>install-node-and-npm</id>
-                        <goals>
-                            <goal>install-node-and-npm</goal>
-                        </goals>
-                        <phase>process-resources</phase>
-                    </execution>
-                    
-                    <!-- 安装依赖 -->
-                    <execution>
-                        <id>npm install</id>
-                        <goals>
-                            <goal>npm</goal>
-                        </goals>
-                        <configuration>
-                            <arguments>install</arguments>
-                        </configuration>
-                        <phase>process-resources</phase>
-                    </execution>
-                    
-                    <!-- 构建前端 -->
-                    <execution>
-                        <id>npm build</id>
-                        <goals>
-                            <goal>npm</goal>
-                        </goals>
-                        <configuration>
-                            <arguments>run build</arguments>
-                        </configuration>
-                        <phase>prepare-package</phase>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- 复制前端构建产物到 static 目录 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <id>copy-frontend-dist</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <copy todir="${frontend.output.directory}" overwrite="true" failonerror="false">
-                                    <fileset dir="${frontend.build.directory}/dist">
-                                        <include name="**/*"/>
-                                    </fileset>
-                                </copy>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
             <!-- Spring Boot Maven 插件 -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -354,116 +260,5 @@
             </plugin>
         </plugins>
     </build>
-
-    <!-- ==================== Maven Profiles ==================== -->
-    <profiles>
-        <!-- 默认构建：包含前端 -->
-        <profile>
-            <id>with-frontend</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-        </profile>
-
-        <!-- 仅后端构建：跳过前端（开发时使用） -->
-        <profile>
-            <id>backend-only</id>
-            <properties>
-                <skip.frontend>true</skip.frontend>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.github.eirslett</groupId>
-                        <artifactId>frontend-maven-plugin</artifactId>
-                        <version>1.15.0</version>
-                        <executions>
-                            <execution>
-                                <id>npm install</id>
-                                <phase>none</phase>
-                            </execution>
-                            <execution>
-                                <id>npm build</id>
-                                <phase>none</phase>
-                            </execution>
-                            <execution>
-                                <id>copy-frontend-dist</id>
-                                <phase>none</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <!-- Linux/Mac 构建（使用不同的 copy 命令） -->
-        <profile>
-            <id>linux</id>
-            <activation>
-                <os>
-                    <family>unix</family>
-                </os>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.github.eirslett</groupId>
-                        <artifactId>frontend-maven-plugin</artifactId>
-                        <version>1.15.0</version>
-                        <configuration>
-                            <nodeVersion>${frontend.node.version}</nodeVersion>
-                            <npmVersion>${frontend.npm.version}</npmVersion>
-                            <workingDirectory>${frontend.build.directory}</workingDirectory>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>npm install</id>
-                                <goals>
-                                    <goal>npm</goal>
-                                </goals>
-                                <configuration>
-                                    <arguments>install</arguments>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>npm build</id>
-                                <goals>
-                                    <goal>npm</goal>
-                                </goals>
-                                <phase>prepare-package</phase>
-                                <configuration>
-                                    <arguments>run build</arguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <!-- 复制前端构建产物到 static 目录 -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <version>3.1.0</version>
-                        <executions>
-                            <execution>
-                                <id>copy-frontend-dist</id>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <copy todir="${frontend.output.directory}" overwrite="true" failonerror="false">
-                                            <fileset dir="${frontend.build.directory}/dist">
-                                                <include name="**/*"/>
-                                            </fileset>
-                                        </copy>
-                                    </target>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
 </project>

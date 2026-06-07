@@ -5,11 +5,11 @@
 -- =====================================================
 
 -- 创建数据库
-CREATE DATABASE IF NOT EXISTS `api_platform` 
+CREATE DATABASE IF NOT EXISTS `api_platform_dev` 
     DEFAULT CHARACTER SET utf8mb4 
     COLLATE utf8mb4_unicode_ci;
 
-USE `api_platform`;
+USE `api_platform_dev`;
 
 -- =====================================================
 -- 第一部分：基础表结构 (schema.sql)

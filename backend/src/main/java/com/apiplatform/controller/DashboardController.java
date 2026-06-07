@@ -5,9 +5,6 @@ import com.apiplatform.service.ChannelService;
 import com.apiplatform.service.ModelService;
 import com.apiplatform.service.OrderService;
 import com.apiplatform.service.UserService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -26,7 +23,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/dashboard")
 @RequiredArgsConstructor
-@Tag(name = "数据看板", description = "系统数据统计和分析相关接口")
 public class DashboardController {
 
     private final UserService userService;
@@ -38,9 +34,8 @@ public class DashboardController {
      * 获取仪表盘概览
      */
     @GetMapping("/overview")
-    @Operation(summary = "获取仪表盘概览", description = "获取系统概览统计数据")
     public Result<Map<String, Object>> getOverview(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId) {
+            @RequestAttribute(value = "userId", required = false) Long userId) {
         
         // 用户统计数据
         Map<String, Object> userStats = userService.getUserStats();
@@ -58,7 +53,6 @@ public class DashboardController {
      * 获取销售统计
      */
     @GetMapping("/sales")
-    @Operation(summary = "获取销售统计", description = "获取销售和收入统计数据")
     public Result<Map<String, Object>> getSalesStats(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
@@ -82,7 +76,6 @@ public class DashboardController {
      * 获取使用统计
      */
     @GetMapping("/usage")
-    @Operation(summary = "获取使用统计", description = "获取API使用统计数据")
     public Result<Map<String, Object>> getUsageStats(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
@@ -107,7 +100,6 @@ public class DashboardController {
      * 获取渠道分布
      */
     @GetMapping("/channel-distribution")
-    @Operation(summary = "获取渠道分布", description = "获取各渠道使用量分布")
     public Result<Map<String, Object>> getChannelDistribution(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
@@ -124,7 +116,6 @@ public class DashboardController {
      * 获取模型分布
      */
     @GetMapping("/model-distribution")
-    @Operation(summary = "获取模型分布", description = "获取各模型使用量分布")
     public Result<Map<String, Object>> getModelDistribution() {
         var modelStats = modelService.list().stream()
                 .map(m -> Map.of(
@@ -145,7 +136,6 @@ public class DashboardController {
      * 获取趋势数据
      */
     @GetMapping("/trend")
-    @Operation(summary = "获取趋势数据", description = "获取指定时间范围内的趋势数据")
     public Result<Map<String, Object>> getTrend(
             @RequestParam String type, // users, orders, usage, revenue
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
@@ -170,7 +160,6 @@ public class DashboardController {
      * 获取实时数据
      */
     @GetMapping("/realtime")
-    @Operation(summary = "获取实时数据", description = "获取实时监控数据")
     public Result<Map<String, Object>> getRealtimeData() {
         Map<String, Object> data = new HashMap<>();
         data.put("activeConnections", 0); // TODO: 从Redis获取
@@ -186,7 +175,6 @@ public class DashboardController {
      * 获取Top排名
      */
     @GetMapping("/top")
-    @Operation(summary = "获取Top排名", description = "获取用户、模型、渠道的Top排名")
     public Result<Map<String, Object>> getTopRanking(
             @RequestParam(defaultValue = "users") String type, // users, models, channels
             @RequestParam(defaultValue = "10") int limit,

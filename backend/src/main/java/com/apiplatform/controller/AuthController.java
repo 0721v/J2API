@@ -10,6 +10,10 @@ import com.apiplatform.service.UserService;
 import com.apiplatform.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +34,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-@Tag(name = "认证管理", description = "用户注册、登录、登出相关接口")
+@Tag(name = "认证模块", description = "用户注册、登录、密码管理等认证相关接口")
 public class AuthController {
 
     private final UserService userService;
@@ -41,8 +45,13 @@ public class AuthController {
      * 用户注册
      */
     @PostMapping("/register")
-    @Operation(summary = "用户注册", description = "注册新用户账号，支持邀请码")
-    public Result<Map<String, Object>> register(@Validated @RequestBody RegisterRequest request) {
+    @Operation(summary = "用户注册", description = "新用户注册账号，支持邀请码注册")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "注册成功"),
+            @ApiResponse(responseCode = "400", description = "参数错误或用户名/邮箱已存在", content = @Content)
+    })
+    public Result<Map<String, Object>> register(
+            @Validated @RequestBody @Parameter(description = "注册请求") RegisterRequest request) {
         try {
             // 处理邀请码
             Long inviterId = null;
@@ -108,8 +117,13 @@ public class AuthController {
      * 用户登录
      */
     @PostMapping("/login")
-    @Operation(summary = "用户登录", description = "使用邮箱或用户名登录")
-    public Result<Map<String, Object>> login(@Validated @RequestBody LoginRequest request) {
+    @Operation(summary = "用户登录", description = "用户使用用户名或邮箱登录系统")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "登录成功，返回用户信息和令牌"),
+            @ApiResponse(responseCode = "401", description = "用户名或密码错误", content = @Content)
+    })
+    public Result<Map<String, Object>> login(
+            @Validated @RequestBody @Parameter(description = "登录请求") LoginRequest request) {
         try {
             Map<String, Object> result = userService.login(request.getLoginKey(), request.getPassword());
             return Result.success("登录成功", result);
@@ -122,7 +136,6 @@ public class AuthController {
      * 退出登录
      */
     @PostMapping("/logout")
-    @Operation(summary = "退出登录", description = "清除登录状态")
     public Result<Void> logout(@RequestHeader(value = "Authorization", required = false) String auth) {
         // 可以在这里添加令牌黑名单等逻辑
         return Result.success("退出成功", null);
@@ -132,7 +145,6 @@ public class AuthController {
      * 刷新令牌
      */
     @PostMapping("/refresh")
-    @Operation(summary = "刷新令牌", description = "使用刷新令牌获取新的访问令牌")
     public Result<Map<String, Object>> refresh(@RequestBody Map<String, String> request) {
         String refreshToken = request.get("refreshToken");
         if (refreshToken == null || refreshToken.isEmpty()) {
@@ -151,9 +163,8 @@ public class AuthController {
      * 获取当前用户信息
      */
     @GetMapping("/me")
-    @Operation(summary = "获取当前用户", description = "获取当前登录用户的信息")
     public Result<Map<String, Object>> getCurrentUser(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId) {
+            @RequestAttribute(value = "userId", required = false) Long userId) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
         }
@@ -182,7 +193,6 @@ public class AuthController {
      * 发送验证码（用于密码重置）
      */
     @PostMapping("/send-verify-code")
-    @Operation(summary = "发送验证码", description = "发送邮箱验证码用于密码重置")
     public Result<Void> sendVerifyCode(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         if (email == null || email.isEmpty()) {
@@ -197,7 +207,6 @@ public class AuthController {
      * 重置密码
      */
     @PostMapping("/reset-password")
-    @Operation(summary = "重置密码", description = "使用验证码重置密码")
     public Result<Void> resetPassword(@Validated @RequestBody ResetPasswordRequest request) {
         try {
             userService.resetPassword(request.getEmail(), request.getVerifyCode(), request.getNewPassword());
@@ -211,9 +220,8 @@ public class AuthController {
      * 修改密码
      */
     @PostMapping("/change-password")
-    @Operation(summary = "修改密码", description = "修改当前登录用户的密码")
     public Result<Void> changePassword(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @Validated @RequestBody ChangePasswordRequest request) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
@@ -233,7 +241,6 @@ public class AuthController {
      * 验证邀请码
      */
     @GetMapping("/invite/validate")
-    @Operation(summary = "验证邀请码", description = "验证邀请码是否有效")
     public Result<Map<String, Object>> validateInviteCode(@RequestParam String inviteCode) {
         InviteRecord record = inviteService.validateInviteCode(inviteCode);
         if (record != null) {
@@ -251,7 +258,6 @@ public class AuthController {
      * 获取邀请奖励配置
      */
     @GetMapping("/invite/rewards")
-    @Operation(summary = "获取邀请奖励", description = "获取当前的邀请奖励配置")
     public Result<List<InviteReward>> getInviteRewards() {
         return Result.success(inviteService.getActiveRewards(null));
     }
@@ -260,9 +266,8 @@ public class AuthController {
      * 获取邀请统计
      */
     @GetMapping("/invite/stats")
-    @Operation(summary = "获取邀请统计", description = "获取当前用户的邀请统计信息")
     public Result<Map<String, Object>> getInviteStats(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId) {
+            @RequestAttribute(value = "userId", required = false) Long userId) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
         }
@@ -273,9 +278,8 @@ public class AuthController {
      * 获取邀请人列表
      */
     @GetMapping("/invite/invitees")
-    @Operation(summary = "获取邀请人列表", description = "获取当前用户邀请的用户列表")
     public Result<List<Map<String, Object>>> getInvitees(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
         if (userId == null) {
@@ -288,9 +292,8 @@ public class AuthController {
      * 获取用户自己的邀请码
      */
     @GetMapping("/invite/code")
-    @Operation(summary = "获取邀请码", description = "获取当前用户的邀请码")
     public Result<Map<String, String>> getInviteCode(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId) {
+            @RequestAttribute(value = "userId", required = false) Long userId) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
         }
@@ -301,29 +304,51 @@ public class AuthController {
     // ==================== 请求DTO ====================
 
     @Data
+    @Schema(description = "登录请求")
     public static class LoginRequest {
+        @Schema(description = "登录账号", example = "admin", requiredMode = Schema.RequiredMode.REQUIRED)
         private String loginKey; // 邮箱或用户名
+        
+        @Schema(description = "密码", example = "123456", requiredMode = Schema.RequiredMode.REQUIRED)
         private String password;
     }
 
     @Data
+    @Schema(description = "注册请求")
     public static class RegisterRequest {
+        @Schema(description = "用户名", example = "testuser", requiredMode = Schema.RequiredMode.REQUIRED)
         private String username;
+        
+        @Schema(description = "邮箱", example = "test@example.com", requiredMode = Schema.RequiredMode.REQUIRED)
         private String email;
+        
+        @Schema(description = "密码", example = "123456", requiredMode = Schema.RequiredMode.REQUIRED)
         private String password;
+        
+        @Schema(description = "邀请码", example = "ABC123")
         private String inviteCode; // 邀请码
     }
 
     @Data
+    @Schema(description = "重置密码请求")
     public static class ResetPasswordRequest {
+        @Schema(description = "邮箱", example = "test@example.com", requiredMode = Schema.RequiredMode.REQUIRED)
         private String email;
+        
+        @Schema(description = "验证码", example = "123456", requiredMode = Schema.RequiredMode.REQUIRED)
         private String verifyCode;
+        
+        @Schema(description = "新密码", example = "newpassword123", requiredMode = Schema.RequiredMode.REQUIRED)
         private String newPassword;
     }
 
     @Data
+    @Schema(description = "修改密码请求")
     public static class ChangePasswordRequest {
+        @Schema(description = "旧密码", example = "oldpassword", requiredMode = Schema.RequiredMode.REQUIRED)
         private String oldPassword;
+        
+        @Schema(description = "新密码", example = "newpassword123", requiredMode = Schema.RequiredMode.REQUIRED)
         private String newPassword;
     }
 }

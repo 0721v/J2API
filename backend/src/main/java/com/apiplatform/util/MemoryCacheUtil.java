@@ -1,6 +1,7 @@
 package com.apiplatform.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -11,12 +12,13 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 内存缓存工具类（当Redis不可用时使用）
+ * 当未配置spring.redis.host时启用
  *
  * @author API Platform Team
  */
 @Slf4j
 @Component
-@ConditionalOnProperty(name = "spring.data.redis.enabled", havingValue = "false")
+@ConditionalOnMissingBean(name = "redisUtil")
 public class MemoryCacheUtil implements CacheUtil {
 
     private final ConcurrentHashMap<String, CacheEntry> cache = new ConcurrentHashMap<>();

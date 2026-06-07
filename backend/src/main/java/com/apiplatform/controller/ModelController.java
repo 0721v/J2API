@@ -5,8 +5,6 @@ import com.apiplatform.common.PageResult;
 import com.apiplatform.common.Result;
 import com.apiplatform.entity.Model;
 import com.apiplatform.service.ModelService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +22,8 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
-@RequestMapping("/models")
+@RequestMapping({"/models", "/admin/models"})
 @RequiredArgsConstructor
-@Tag(name = "模型管理", description = "AI模型配置管理相关接口")
 public class ModelController {
 
     private final ModelService modelService;
@@ -35,7 +32,6 @@ public class ModelController {
      * 获取模型列表
      */
     @GetMapping
-    @Operation(summary = "获取模型列表", description = "获取所有启用的AI模型列表")
     public Result<List<Model>> getModels() {
         List<Model> models = modelService.selectEnabled();
         return Result.success(models);
@@ -45,7 +41,6 @@ public class ModelController {
      * 获取模型列表（分页）
      */
     @GetMapping("/page")
-    @Operation(summary = "获取模型列表（分页）", description = "分页获取模型列表")
     public Result<PageResult<Model>> getModelsPage(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -61,7 +56,6 @@ public class ModelController {
      * 根据类型获取模型
      */
     @GetMapping("/type/{type}")
-    @Operation(summary = "按类型获取模型", description = "获取指定类型的模型列表")
     public Result<List<Model>> getModelsByType(@PathVariable String type) {
         List<Model> models = modelService.getModelsByType(type);
         return Result.success(models);
@@ -71,7 +65,6 @@ public class ModelController {
      * 获取模型详情
      */
     @GetMapping("/{modelId}")
-    @Operation(summary = "获取模型详情", description = "获取指定模型的详细信息")
     public Result<Model> getModel(@PathVariable String modelId) {
         Model model = modelService.getByModelId(modelId);
         if (model == null) {
@@ -84,17 +77,14 @@ public class ModelController {
      * 获取模型价格
      */
     @GetMapping("/{modelId}/pricing")
-    @Operation(summary = "获取模型价格", description = "获取指定模型的价格信息")
     public Result<Map<String, Object>> getModelPricing(@PathVariable String modelId) {
         Map<String, Object> pricing = modelService.getModelPricing(modelId);
         return Result.success(pricing);
     }
 
     /**
-     * 创建模型（管理员）
-     */
+     * 创建模型（管理员�?     */
     @PostMapping
-    @Operation(summary = "创建模型", description = "创建新的AI模型配置")
     public Result<Model> createModel(@Validated @RequestBody CreateModelRequest request) {
         try {
             Model model = modelService.createModel(
@@ -121,10 +111,8 @@ public class ModelController {
     }
 
     /**
-     * 更新模型（管理员）
-     */
+     * 更新模型（管理员�?     */
     @PutMapping("/{id}")
-    @Operation(summary = "更新模型", description = "更新指定模型的配置")
     public Result<Model> updateModel(
             @PathVariable Long id,
             @Validated @RequestBody UpdateModelRequest request) {
@@ -154,10 +142,8 @@ public class ModelController {
     }
 
     /**
-     * 删除模型（管理员）
-     */
+     * 删除模型（管理员�?     */
     @DeleteMapping("/{id}")
-    @Operation(summary = "删除模型", description = "删除指定的AI模型")
     public Result<Void> deleteModel(@PathVariable Long id) {
         try {
             modelService.deleteModel(id);
@@ -171,7 +157,6 @@ public class ModelController {
      * 启用模型（管理员）
      */
     @PostMapping("/{id}/enable")
-    @Operation(summary = "启用模型", description = "启用指定的AI模型")
     public Result<Void> enableModel(@PathVariable Long id) {
         modelService.enableModel(id);
         return Result.success("模型已启用", null);
@@ -181,7 +166,6 @@ public class ModelController {
      * 禁用模型（管理员）
      */
     @PostMapping("/{id}/disable")
-    @Operation(summary = "禁用模型", description = "禁用指定的AI模型")
     public Result<Void> disableModel(@PathVariable Long id) {
         modelService.disableModel(id);
         return Result.success("模型已禁用", null);

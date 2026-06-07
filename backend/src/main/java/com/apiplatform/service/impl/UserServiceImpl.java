@@ -1,6 +1,5 @@
 package com.apiplatform.service.impl;
 
-import cn.hutool.crypto.SecureUtil;
 import com.apiplatform.common.*;
 import com.apiplatform.entity.Token;
 import com.apiplatform.entity.Transaction;
@@ -16,6 +15,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +38,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final TokenMapper tokenMapper;
     private final TransactionMapper transactionMapper;
     private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -352,16 +353,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    @Transactional
     public void updateLastLogin(Long userId, String ip) {
-        User user = getById(userId);
-        if (user != null) {
-            user.setLastLoginTime(LocalDateTime.now());
-            if (ip != null) {
-                user.setLastLoginIp(ip);
-            }
-            updateById(user);
-        }
+        userMapper.updateLastLogin(userId, LocalDateTime.now(), ip);
+        log.info("更新用户最后登录时间: userId={}, ip={}", userId, ip);
     }
 
     @Override
@@ -388,14 +382,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public boolean verifyPassword(String rawPassword, String encodedPassword) {
-        // 使用BCrypt或MD5验证
-        String encoded = SecureUtil.md5(rawPassword);
-        return encoded.equals(encodedPassword) || rawPassword.equals(encodedPassword);
+        // 兼容旧的MD5密码（用于迁移）
+        if (encodedPassword != null && !encodedPassword.startsWith("$2a$") && !encodedPassword.startsWith("$2b$") && !encodedPassword.startsWith("$2y$")) {
+            // 旧的MD5格式
+            String md5Encoded = cn.hutool.crypto.SecureUtil.md5(rawPassword);
+            return md5Encoded.equals(encodedPassword);
+        }
+        // 使用BCrypt验证
+        return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 
     @Override
     public String encodePassword(String rawPassword) {
-        return SecureUtil.md5(rawPassword);
+        // 使用BCrypt加密
+        return passwordEncoder.encode(rawPassword);
     }
 
     /**

@@ -5,8 +5,6 @@ import com.apiplatform.common.PageResult;
 import com.apiplatform.common.Result;
 import com.apiplatform.entity.ApiProxy;
 import com.apiplatform.service.ApiProxyService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +23,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin/proxies")
 @RequiredArgsConstructor
-@Tag(name = "API代理管理", description = "API代理配置和转发管理")
 public class ApiProxyController {
 
     private final ApiProxyService apiProxyService;
@@ -34,7 +31,6 @@ public class ApiProxyController {
      * 获取代理列表
      */
     @GetMapping
-    @Operation(summary = "获取代理列表", description = "获取所有API代理配置")
     @PreAuthorize("hasRole('ADMIN')")
     public Result<List<ApiProxy>> getProxyList() {
         List<ApiProxy> proxies = apiProxyService.list();
@@ -45,7 +41,6 @@ public class ApiProxyController {
      * 分页查询代理
      */
     @GetMapping("/page")
-    @Operation(summary = "分页查询", description = "分页查询代理配置")
     @PreAuthorize("hasRole('ADMIN')")
     public Result<PageResult<ApiProxy>> getProxyPage(
             @RequestParam(defaultValue = "1") int page,
@@ -60,7 +55,6 @@ public class ApiProxyController {
      * 获取代理详情
      */
     @GetMapping("/{id}")
-    @Operation(summary = "获取详情", description = "获取指定代理的详细信息")
     @PreAuthorize("hasRole('ADMIN')")
     public Result<ApiProxy> getProxyDetail(@PathVariable Long id) {
         ApiProxy proxy = apiProxyService.getProxyById(id);
@@ -74,7 +68,6 @@ public class ApiProxyController {
      * 创建代理
      */
     @PostMapping
-    @Operation(summary = "创建代理", description = "创建新的API代理配置")
     @PreAuthorize("hasRole('ADMIN')")
     public Result<ApiProxy> createProxy(@Validated @RequestBody ApiProxyRequest request) {
         try {
@@ -90,7 +83,6 @@ public class ApiProxyController {
      * 更新代理
      */
     @PutMapping("/{id}")
-    @Operation(summary = "更新代理", description = "更新指定代理的配置")
     @PreAuthorize("hasRole('ADMIN')")
     public Result<ApiProxy> updateProxy(@PathVariable Long id, @RequestBody ApiProxyRequest request) {
         try {
@@ -106,7 +98,6 @@ public class ApiProxyController {
      * 删除代理
      */
     @DeleteMapping("/{id}")
-    @Operation(summary = "删除代理", description = "删除指定代理")
     @PreAuthorize("hasRole('ADMIN')")
     public Result<Void> deleteProxy(@PathVariable Long id) {
         try {
@@ -121,7 +112,6 @@ public class ApiProxyController {
      * 复制代理
      */
     @PostMapping("/{id}/copy")
-    @Operation(summary = "复制代理", description = "复制代理配置")
     @PreAuthorize("hasRole('ADMIN')")
     public Result<ApiProxy> copyProxy(@PathVariable Long id, @RequestParam String newName) {
         try {
@@ -136,7 +126,6 @@ public class ApiProxyController {
      * 测试代理连接
      */
     @PostMapping("/{id}/test")
-    @Operation(summary = "测试连接", description = "测试代理目标URL连通性")
     @PreAuthorize("hasRole('ADMIN')")
     public Result<Boolean> testProxy(@PathVariable Long id) {
         ApiProxy proxy = apiProxyService.getProxyById(id);
@@ -156,7 +145,6 @@ public class ApiProxyController {
      * 批量启用/禁用
      */
     @PostMapping("/batch-status")
-    @Operation(summary = "批量更新状态", description = "批量启用或禁用代理")
     @PreAuthorize("hasRole('ADMIN')")
     public Result<Void> batchUpdateStatus(
             @RequestBody BatchStatusRequest request) {
@@ -168,7 +156,6 @@ public class ApiProxyController {
      * 切换代理状态
      */
     @PostMapping("/{id}/toggle")
-    @Operation(summary = "切换状态", description = "启用或禁用代理")
     @PreAuthorize("hasRole('ADMIN')")
     public Result<Void> toggleProxy(@PathVariable Long id) {
         ApiProxy proxy = apiProxyService.getById(id);
@@ -185,7 +172,6 @@ public class ApiProxyController {
      * 获取启用的代理
      */
     @GetMapping("/enabled")
-    @Operation(summary = "获取启用列表", description = "获取所有启用的代理配置")
     public Result<List<ApiProxy>> getEnabledProxies() {
         List<ApiProxy> proxies = apiProxyService.getEnabledProxies();
         return Result.success(proxies);

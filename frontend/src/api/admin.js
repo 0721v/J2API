@@ -25,11 +25,11 @@ export function deleteChannel(id) {
 }
 
 export function getChannelTemplates() {
-  return request.get('/admin/channels/templates')
+  return request.get('/admin/channel-templates/templates')
 }
 
 export function createChannelFromTemplate(templateId, data) {
-  return request.post(`/admin/channels/templates/${templateId}`, data)
+  return request.post(`/admin/channel-templates/templates/${templateId}`, data)
 }
 
 export function getChannelModels(channelId) {

@@ -94,13 +94,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        // 忽略登录、注册、OAuth等不需要认证的路径
-        return path.startsWith("/api/auth/") 
-                || path.startsWith("/api/oauth/")
-                || path.startsWith("/api/public/")
+        // 忽略登录、注册等不需要认证的路径（context-path 为 /api，所以这里不需要加 /api 前缀）
+        // /auth/me 需要认证，不排除
+        return path.startsWith("/auth/login")
+                || path.startsWith("/auth/register")
+                || path.startsWith("/auth/refresh")
+                || path.startsWith("/auth/forgot-password")
+                || path.startsWith("/auth/reset-password")
+                || path.startsWith("/auth/verify-email")
+                || path.startsWith("/oauth/")
+                || path.startsWith("/public/")
+                || path.startsWith("/druid")
+                || path.contains("/error")
+                // Swagger UI 路径
                 || path.startsWith("/swagger-ui")
                 || path.startsWith("/v3/api-docs")
-                || path.startsWith("/druid")
-                || path.contains("/error");
+                || path.startsWith("/api-docs");
     }
 }

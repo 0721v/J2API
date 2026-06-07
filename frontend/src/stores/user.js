@@ -67,11 +67,16 @@ export const useUserStore = defineStore('user', () => {
       const res = await getUserInfo()
       if (res.code === 200) {
         userInfo.value = res.data
+        // 存储用户角色到 localStorage，供路由守卫使用
+        if (res.data.role) {
+          localStorage.setItem('user_role', res.data.role)
+        }
       }
     } catch (error) {
       console.error('Fetch user info failed:', error)
       if (error.response?.status === 401) {
         clearToken()
+        localStorage.removeItem('user_role')
         router.push('/login')
       }
     }
@@ -89,6 +94,7 @@ export const useUserStore = defineStore('user', () => {
     refreshToken.value = ''
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
+    localStorage.removeItem('user_role')
   }
   
   function setLocale(newLocale) {

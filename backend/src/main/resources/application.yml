@@ -35,16 +35,13 @@ spring:
       pool-name: ApiPlatformHikariCP
   
   # Redis基础配置（具体连接信息在各环境配置中）
-  data:
-    redis:
-      lettuce:
-        pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 0
-          max-wait: -1ms
-      cache:
-        ttl: 3600
+  redis:
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1ms
   
   # 文件上传配置
   servlet:
@@ -149,6 +146,24 @@ payment:
     enabled: false
     endpoint: https://api.creem.io
     currency: usd
+
+# SpringDoc OpenAPI 配置
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+    resolve-schema-properties: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    tags-sorter: alpha
+    operations-sorter: alpha
+    # 中文界面配置
+    supported-submit-methods: ["get", "put", "post", "delete", "options", "head", "patch", "trace"]
+    display-request-duration: true
+    default-model-expand-depth: 2
+    default-model-render-depth: 2
+    locale: zh-CN
 
 # Actuator配置
 management:

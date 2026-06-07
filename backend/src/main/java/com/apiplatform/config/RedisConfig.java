@@ -24,12 +24,12 @@ import java.time.Duration;
 
 /**
  * Redis 配置
- * 只有当 spring.data.redis.enabled=true 时才生效
+ * 只有当 spring.redis.host 配置时才生效
  *
  * @author API Platform Team
  */
 @Configuration
-@ConditionalOnProperty(name = "spring.data.redis.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(name = "spring.redis.host")
 public class RedisConfig {
 
     /**

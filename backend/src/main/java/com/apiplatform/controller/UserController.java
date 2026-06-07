@@ -3,9 +3,6 @@ package com.apiplatform.controller;
 import com.apiplatform.common.Result;
 import com.apiplatform.service.UsageLogService;
 import com.apiplatform.service.UserService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -24,7 +21,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
-@Tag(name = "用户管理", description = "用户信息管理相关接口")
 public class UserController {
 
     private final UserService userService;
@@ -34,9 +30,8 @@ public class UserController {
      * 获取用户资料
      */
     @GetMapping("/profile")
-    @Operation(summary = "获取用户资料", description = "获取当前用户的详细资料")
     public Result<Map<String, Object>> getProfile(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId) {
+            @RequestAttribute(value = "userId", required = false) Long userId) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
         }
@@ -66,9 +61,8 @@ public class UserController {
      * 更新用户资料
      */
     @PutMapping("/profile")
-    @Operation(summary = "更新用户资料", description = "更新当前用户的资料信息")
     public Result<Map<String, Object>> updateProfile(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @RequestBody Map<String, String> request) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
@@ -93,9 +87,8 @@ public class UserController {
      * 获取用户余额
      */
     @GetMapping("/balance")
-    @Operation(summary = "获取用户余额", description = "获取当前用户的账户余额")
     public Result<Map<String, Object>> getBalance(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId) {
+            @RequestAttribute(value = "userId", required = false) Long userId) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
         }
@@ -113,9 +106,8 @@ public class UserController {
      * 获取使用统计
      */
     @GetMapping("/stats")
-    @Operation(summary = "获取使用统计", description = "获取当前用户的使用统计信息")
     public Result<Map<String, Object>> getStats(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
         if (userId == null) {
@@ -140,6 +132,34 @@ public class UserController {
         Long balance = userService.getBalance(userId);
         stats.put("balance", balance);
         
+        // 转换字段名以匹配前端期望
+        stats.put("monthlyCost", stats.getOrDefault("totalAmount", 0L));
+        stats.put("tokenCount", ((Number)stats.getOrDefault("totalInputTokens", 0)).intValue() + 
+                            ((Number)stats.getOrDefault("totalOutputTokens", 0)).intValue());
+        
+        // 获取趋势数据
+        LocalDateTime trendStart = LocalDateTime.now().minusDays(7);
+        List<Map<String, Object>> trend = usageLogService.getDailyUsageTrend(userId, trendStart, endTime);
+        // 转换趋势数据格式
+        List<Map<String, Object>> formattedTrend = trend.stream().map(item -> {
+            Map<String, Object> formatted = new HashMap<>();
+            formatted.put("date", item.get("date"));
+            formatted.put("count", item.getOrDefault("calls", item.getOrDefault("count", 0)));
+            return formatted;
+        }).collect(java.util.stream.Collectors.toList());
+        stats.put("trend", formattedTrend);
+        
+        // 获取模型排行
+        List<Map<String, Object>> modelRankingData = usageLogService.getModelUsageRanking(userId, startTime, endTime);
+        // 转换模型排行格式
+        List<Map<String, Object>> formattedRanking = modelRankingData.stream().map(item -> {
+            Map<String, Object> formatted = new HashMap<>();
+            formatted.put("model", item.getOrDefault("modelName", item.getOrDefault("model", "Unknown")));
+            formatted.put("count", item.getOrDefault("calls", item.getOrDefault("count", 0)));
+            return formatted;
+        }).collect(java.util.stream.Collectors.toList());
+        stats.put("modelRanking", formattedRanking);
+        
         return Result.success(stats);
     }
 
@@ -147,9 +167,8 @@ public class UserController {
      * 更新语言偏好
      */
     @PutMapping("/language")
-    @Operation(summary = "更新语言偏好", description = "更新用户的首选语言")
     public Result<Void> updateLanguage(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @RequestParam String language) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
@@ -163,9 +182,8 @@ public class UserController {
      * 更新主题偏好
      */
     @PutMapping("/theme")
-    @Operation(summary = "更新主题偏好", description = "更新用户的首选主题")
     public Result<Void> updateTheme(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @RequestParam String theme) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
@@ -179,9 +197,8 @@ public class UserController {
      * 获取模型使用排名
      */
     @GetMapping("/model-ranking")
-    @Operation(summary = "获取模型使用排名", description = "获取用户使用量最高的模型列表")
     public Result<Object> getModelRanking(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
         if (userId == null) {
@@ -199,9 +216,8 @@ public class UserController {
      * 获取渠道使用排名
      */
     @GetMapping("/channel-ranking")
-    @Operation(summary = "获取渠道使用排名", description = "获取用户使用量最高的渠道列表")
     public Result<Object> getChannelRanking(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
         if (userId == null) {
@@ -219,9 +235,8 @@ public class UserController {
      * 获取日使用趋势
      */
     @GetMapping("/daily-trend")
-    @Operation(summary = "获取日使用趋势", description = "获取用户每日使用量的趋势数据")
     public Result<Object> getDailyTrend(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
         if (userId == null) {

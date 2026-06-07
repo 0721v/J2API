@@ -22,7 +22,6 @@ public class CacheConfig {
      * 内存缓存管理器（作为回退）
      */
     @Bean
-    @Primary
     @ConditionalOnMissingBean(name = "cacheManager")
     public CacheManager memoryCacheManager() {
         ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager();

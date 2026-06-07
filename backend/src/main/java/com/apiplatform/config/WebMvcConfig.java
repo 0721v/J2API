@@ -1,9 +1,13 @@
 package com.apiplatform.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.List;
 
 /**
  * Web MVC 配置
@@ -11,6 +15,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
+
+    @Autowired
+    private UserIdArgumentResolver userIdArgumentResolver;
+
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        // 注册用户ID参数解析器
+        resolvers.add(userIdArgumentResolver);
+    }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

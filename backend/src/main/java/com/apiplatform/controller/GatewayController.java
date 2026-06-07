@@ -8,8 +8,6 @@ import com.apiplatform.service.ModelService;
 import com.apiplatform.service.RateLimitService;
 import com.apiplatform.service.TokenService;
 import com.apiplatform.service.UsageLogService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -30,7 +28,6 @@ import java.util.concurrent.CompletableFuture;
 @RestController
 @RequestMapping("/v1")
 @RequiredArgsConstructor
-@Tag(name = "AI API", description = "OpenAI兼容的AI API接口")
 public class GatewayController {
 
     private final TokenService tokenService;
@@ -47,7 +44,6 @@ public class GatewayController {
      * POST /v1/chat/completions
      */
     @PostMapping("/chat/completions")
-    @Operation(summary = "聊天补全", description = "OpenAI兼容的聊天补全API")
     public ResponseEntity<?> chatCompletions(
             @RequestHeader(value = "Authorization", required = false) String auth,
             @RequestBody Map<String, Object> request) {
@@ -109,7 +105,6 @@ public class GatewayController {
      * 流式Chat Completions
      */
     @PostMapping("/chat/completions-stream")
-    @Operation(summary = "聊天补全（流式）", description = "支持流式输出的聊天补全API")
     public SseEmitter chatCompletionsStream(
             @RequestHeader(value = "Authorization", required = false) String auth,
             @RequestBody Map<String, Object> request) {
@@ -153,7 +148,6 @@ public class GatewayController {
      * POST /v1/completions
      */
     @PostMapping("/completions")
-    @Operation(summary = "文本补全", description = "OpenAI兼容的文本补全API")
     public ResponseEntity<?> completions(
             @RequestHeader(value = "Authorization", required = false) String auth,
             @RequestBody Map<String, Object> request) {
@@ -174,7 +168,6 @@ public class GatewayController {
      * POST /v1/embeddings
      */
     @PostMapping("/embeddings")
-    @Operation(summary = "文本嵌入", description = "OpenAI兼容的文本嵌入API")
     public ResponseEntity<?> embeddings(
             @RequestHeader(value = "Authorization", required = false) String auth,
             @RequestBody Map<String, Object> request) {
@@ -201,7 +194,6 @@ public class GatewayController {
      * GET /v1/models
      */
     @GetMapping("/models")
-    @Operation(summary = "获取模型列表", description = "获取所有可用模型列表")
     public ResponseEntity<?> listModels() {
         var models = modelService.selectEnabled();
         
@@ -223,7 +215,6 @@ public class GatewayController {
      * GET /v1/models/{model}
      */
     @GetMapping("/models/{model}")
-    @Operation(summary = "获取模型详情", description = "获取指定模型的详细信息")
     public ResponseEntity<?> getModel(@PathVariable String model) {
         var modelEntity = modelService.getByModelId(model);
         if (modelEntity == null) {
@@ -253,8 +244,7 @@ public class GatewayController {
     }
 
     /**
-     * 验证并获取令牌
-     */
+     * 验证并获取令�?     */
     private Token validateAndGetToken(String apiKey) {
         Token token = tokenService.validateToken(apiKey);
         if (token == null) {

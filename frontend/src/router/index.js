@@ -78,6 +78,18 @@ const routes = [
         name: 'AgentCenter',
         component: () => import('@/views/agent/index.vue'),
         meta: { title: '代理商中心' }
+      },
+      {
+        path: 'report',
+        name: 'Report',
+        component: () => import('@/views/report/index.vue'),
+        meta: { title: '我的报表' }
+      },
+      {
+        path: 'announcements',
+        name: 'Announcements',
+        component: () => import('@/views/announcements/index.vue'),
+        meta: { title: '系统公告' }
       }
     ]
   },

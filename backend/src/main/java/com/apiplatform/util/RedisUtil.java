@@ -11,12 +11,13 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Redis工具类
+ * 当配置了spring.redis.host时启用
  *
  * @author API Platform Team
  */
 @Slf4j
 @Component
-@ConditionalOnProperty(name = "spring.data.redis.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(name = "spring.redis.host")
 public class RedisUtil implements CacheUtil {
 
     private final RedisTemplate<String, Object> redisTemplate;

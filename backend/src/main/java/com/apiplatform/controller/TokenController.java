@@ -6,9 +6,6 @@ import com.apiplatform.common.Result;
 import com.apiplatform.entity.Token;
 import com.apiplatform.service.TokenService;
 import com.apiplatform.util.ApiKeyUtil;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +25,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/tokens")
 @RequiredArgsConstructor
-@Tag(name = "令牌管理", description = "API令牌管理相关接口")
 public class TokenController {
 
     private final TokenService tokenService;
@@ -38,9 +34,8 @@ public class TokenController {
      * 获取用户令牌列表
      */
     @GetMapping
-    @Operation(summary = "获取令牌列表", description = "获取当前用户的API令牌列表")
     public Result<PageResult<Token>> getTokens(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
         if (userId == null) {
@@ -55,9 +50,8 @@ public class TokenController {
      * 创建令牌
      */
     @PostMapping
-    @Operation(summary = "创建令牌", description = "创建新的API令牌")
     public Result<Token> createToken(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @Validated @RequestBody CreateTokenRequest request) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
@@ -91,9 +85,8 @@ public class TokenController {
      * 获取令牌详情
      */
     @GetMapping("/{id}")
-    @Operation(summary = "获取令牌详情", description = "获取指定令牌的详细信息")
     public Result<Token> getToken(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @PathVariable Long id) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
@@ -111,9 +104,8 @@ public class TokenController {
      * 更新令牌
      */
     @PutMapping("/{id}")
-    @Operation(summary = "更新令牌", description = "更新指定令牌的配置")
     public Result<Token> updateToken(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @PathVariable Long id,
             @Validated @RequestBody UpdateTokenRequest request) {
         if (userId == null) {
@@ -143,9 +135,8 @@ public class TokenController {
      * 删除令牌
      */
     @DeleteMapping("/{id}")
-    @Operation(summary = "删除令牌", description = "删除指定的API令牌")
     public Result<Void> deleteToken(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @PathVariable Long id) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
@@ -163,9 +154,8 @@ public class TokenController {
      * 启用令牌
      */
     @PostMapping("/{id}/enable")
-    @Operation(summary = "启用令牌", description = "启用指定的API令牌")
     public Result<Void> enableToken(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @PathVariable Long id) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
@@ -183,9 +173,8 @@ public class TokenController {
      * 禁用令牌
      */
     @PostMapping("/{id}/disable")
-    @Operation(summary = "禁用令牌", description = "禁用指定的API令牌")
     public Result<Void> disableToken(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @PathVariable Long id) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
@@ -203,9 +192,8 @@ public class TokenController {
      * 获取令牌使用统计
      */
     @GetMapping("/{id}/usage")
-    @Operation(summary = "获取令牌使用统计", description = "获取指定令牌的使用统计信息")
     public Result<Map<String, Object>> getTokenUsage(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @PathVariable Long id) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
@@ -223,9 +211,8 @@ public class TokenController {
      * 续期令牌
      */
     @PostMapping("/{id}/renew")
-    @Operation(summary = "续期令牌", description = "延长令牌的过期时间")
     public Result<Token> renewToken(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @PathVariable Long id) {
         if (userId == null) {
             return Result.unauthorized("请先登录");

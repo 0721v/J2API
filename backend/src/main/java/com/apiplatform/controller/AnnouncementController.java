@@ -5,9 +5,6 @@ import com.apiplatform.common.PageResult;
 import com.apiplatform.common.Result;
 import com.apiplatform.entity.Announcement;
 import com.apiplatform.service.AnnouncementService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +17,8 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/announcements")
+@RequestMapping("/announcements")
 @RequiredArgsConstructor
-@Tag(name = "公告管理", description = "系统公告相关接口")
 public class AnnouncementController {
 
     private final AnnouncementService announcementService;
@@ -33,9 +29,8 @@ public class AnnouncementController {
      * 获取公告列表
      */
     @GetMapping
-    @Operation(summary = "获取公告列表", description = "获取已发布的公告列表")
     public Result<PageResult<Announcement>> getList(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId,
+            @RequestAttribute(value = "userId", required = false) Long userId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int pageSize) {
         if (userId == null) {
@@ -48,10 +43,9 @@ public class AnnouncementController {
      * 获取公告详情
      */
     @GetMapping("/{id}")
-    @Operation(summary = "获取公告详情", description = "获取公告详情并标记为已读")
     public Result<Announcement> getDetail(
             @PathVariable Long id,
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId) {
+            @RequestAttribute(value = "userId", required = false) Long userId) {
         Announcement announcement = announcementService.getById(id);
         if (userId != null) {
             announcementService.markAsRead(id, userId);
@@ -63,9 +57,8 @@ public class AnnouncementController {
      * 获取未读公告数量
      */
     @GetMapping("/unread-count")
-    @Operation(summary = "获取未读数量", description = "获取当前用户的未读公告数量")
     public Result<Integer> getUnreadCount(
-            @Parameter(hidden = true) @RequestAttribute(value = "userId", required = false) Long userId) {
+            @RequestAttribute(value = "userId", required = false) Long userId) {
         if (userId == null) {
             return Result.success(0);
         }
@@ -76,10 +69,9 @@ public class AnnouncementController {
      * 标记公告为已读
      */
     @PostMapping("/{id}/read")
-    @Operation(summary = "标记已读", description = "将公告标记为已读")
     public Result<Void> markAsRead(
             @PathVariable Long id,
-            @Parameter(hidden = true) @RequestAttribute(value = "userId") Long userId) {
+            @RequestAttribute(value = "userId") Long userId) {
         if (userId == null) {
             return Result.unauthorized("请先登录");
         }
@@ -93,7 +85,6 @@ public class AnnouncementController {
      * 管理端：获取公告列表
      */
     @GetMapping("/admin/list")
-    @Operation(summary = "管理端-获取公告列表")
     public Result<PageResult<Announcement>> getAdminList(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int pageSize) {
@@ -104,7 +95,6 @@ public class AnnouncementController {
      * 管理端：获取历史公告
      */
     @GetMapping("/admin/history")
-    @Operation(summary = "管理端-获取历史公告")
     public Result<PageResult<Announcement>> getHistoryList(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int pageSize) {
@@ -115,10 +105,9 @@ public class AnnouncementController {
      * 管理端：创建公告
      */
     @PostMapping("/admin")
-    @Operation(summary = "管理端-创建公告")
     public Result<Announcement> create(
             @Validated @RequestBody AnnouncementRequest request,
-            @Parameter(hidden = true) @RequestAttribute(value = "userId") Long adminId) {
+            @RequestAttribute(value = "userId") Long adminId) {
         if (adminId == null) {
             return Result.unauthorized("请先登录");
         }
@@ -137,7 +126,6 @@ public class AnnouncementController {
      * 管理端：更新公告
      */
     @PutMapping("/admin/{id}")
-    @Operation(summary = "管理端-更新公告")
     public Result<Announcement> update(
             @PathVariable Long id,
             @Validated @RequestBody AnnouncementRequest request) {
@@ -156,7 +144,6 @@ public class AnnouncementController {
      * 管理端：删除公告
      */
     @DeleteMapping("/admin/{id}")
-    @Operation(summary = "管理端-删除公告")
     public Result<Void> delete(@PathVariable Long id) {
         announcementService.delete(id);
         return Result.success("删除成功", null);
@@ -166,7 +153,6 @@ public class AnnouncementController {
      * 管理端：发布公告
      */
     @PostMapping("/admin/{id}/publish")
-    @Operation(summary = "管理端-发布公告")
     public Result<Announcement> publish(@PathVariable Long id) {
         return Result.success(announcementService.publish(id));
     }
@@ -175,7 +161,6 @@ public class AnnouncementController {
      * 管理端：归档公告
      */
     @PostMapping("/admin/{id}/archive")
-    @Operation(summary = "管理端-归档公告")
     public Result<Announcement> archive(@PathVariable Long id) {
         return Result.success(announcementService.archive(id));
     }

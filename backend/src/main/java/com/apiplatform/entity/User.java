@@ -71,6 +71,7 @@ public class User {
     private String preferredTheme = "light";
 
     /** 最后登录时间 */
+    @TableField("last_login_at")
     private LocalDateTime lastLoginTime;
 
     /** 最后登录IP */
@@ -89,6 +90,7 @@ public class User {
     private String inviteCode;
 
     /** 用户分组ID */
+    @TableField("user_group_id")
     private Long groupId;
 
     /** 分组过期时间 */
